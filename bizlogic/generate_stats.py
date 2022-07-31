@@ -14,7 +14,9 @@ from datastore.models.mega_millions import (Days, DaysOfTheWeek,
 from datastore.models.mega_millions_generated_data import \
     ConnectedNumberOccurrences
 
-engine_name = "mega_millions_after_2013"
+# engine_name = "mega_millions_after_2013"
+appender = "_496"
+engine_name = "mega_millions" + appender
 engine = get_engine(name=engine_name)
 Session = sessionmaker(engine)
 
@@ -24,7 +26,7 @@ ROOT_DIR = os.path.abspath(os.curdir)
 def get_percent_for_all_numbers() -> None:
     row_list = [["Number", "Count", "Percentage"]]
     with open(
-        f"{ROOT_DIR}/statistics/regular_number_stats.csv", "w", newline=""
+        f"{ROOT_DIR}/statistics/regular_number_stats{appender}.csv", "w", newline=""
     ) as file:
         with Session() as sess:
             count_of_all_rows = sess.query(RegularNumbers).count()
@@ -45,7 +47,7 @@ def get_percent_for_all_numbers() -> None:
 
     row_list = [["Number", "Count", "Percentage"]]
     with open(
-        f"{ROOT_DIR}/statistics/mega_ball_number_stats.csv", "w", newline=""
+        f"{ROOT_DIR}/statistics/mega_ball_number_stats{appender}.csv", "w", newline=""
     ) as file:
         with Session() as sess:
             count_of_all_rows = sess.query(MegaBallNumbers).count()

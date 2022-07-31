@@ -45,6 +45,7 @@ class RegularNumbers(Base, db.Model):
     days_of_the_week = relationship("DaysOfTheWeek", back_populates="regular_numbers")
     years = relationship("Years", back_populates="regular_numbers")
     days = relationship("Days", back_populates="regular_numbers")
+    # TODO - create DaysAgo column id
 
     def __repr__(self):
         return f"Number(id={self.id!r}, number={self.number!r}"
@@ -177,3 +178,5 @@ class Days(Base, db.Model):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+# TODO - create DaysAgo table that maps to DaysAgo id
