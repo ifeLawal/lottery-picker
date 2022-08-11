@@ -27,6 +27,10 @@ def check_list_of_tickets(ticket: list, date: date):
     return [{constants.REGULAR_NUMBERS_PROPERTY_NAME:{"23": constants.MATCHED, "43": constants.UNMATCHED}, constants.MEGA_BALL_NUMBER_PROPERTY_NAME: {"23"}}]
 
 def get_number_matches_on_ticket(ticket: list, regular_winners: object, mega_ball_winner: object) -> object:
+    """
+    :return: regular number matches and mega ball matches
+    :rtype: tuple sample - ({"64": True, "12": True, "33": True, "19": True, "23": True}, {"12": True})
+    """
     regular_number_results = {}
     mega_ball_number_results = {}
     counter = 0
@@ -47,12 +51,16 @@ def get_number_matches_on_ticket(ticket: list, regular_winners: object, mega_bal
     return regular_number_results, mega_ball_number_results
     # return {constants.REGULAR_NUMBERS_PROPERTY_NAME: regular_number_results, constants.MEGA_BALL_NUMBER_PROPERTY_NAME: mega_ball_number_results}
 
-"""
-ticket_matching expected sample object
-tuple
-{"regular_numbers":{"23": "match found", "43": "no match", "56": "no match", "1": "no match", "10": "no match"}, "mega_ball_number": {"23": "match found"}}]
-"""
-def check_winnings_for_a_ticket(ticket: object, regular_winners: object, mega_ball_winner: object) -> int:
+def check_winnings_for_a_ticket(ticket: list, regular_winners: object, mega_ball_winner: object) -> int:
+    """
+    check how much is won from the ticket numbers
+    
+    :param object ticket: a tickets list of numbers. sample - [64, 12, 33, 19, 23, 12]
+    :param object regular_winners: winning ticket numbers. sample - {"64": True, "12": True, "33": True, "19": True, "23": True} 
+    :param object mega_ball_winner: winning mega ball number. sample - {"12": True}
+    :return: the winnings
+    :rtype: int sample - 10
+    """
     # If a player matches all five numbers, but not the “Mega Ball,” then they would win $1 million, according to officials.
     # Matching four numbers plus the “Mega Ball” would net the player $10,000. Matching four numbers without the “Mega Ball” would earn the player a $500 prize.
     # Matching three numbers and the “Mega Ball” is worth $200.
