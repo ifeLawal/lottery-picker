@@ -1,24 +1,17 @@
 import csv
 import os
-from multiprocessing import connection
 
-from sqlalchemy.orm import sessionmaker
-from bizlogic.mega_millions import create_date_mapping_tables
 
-from datastore.connecting import get_engine
-from datastore.models import create_all_tables
-from datastore.models.mega_millions import (Days, DaysOfTheWeek,
-                                            MegaBallNumbers, Months, Quarters,
-                                            RegularNumbers, Weeks, Winners,
-                                            Years)
+from datastore.connecting import DatabaseConnector
 from datastore.models.mega_millions_generated_data import \
     ConnectedNumberOccurrences
 
 # engine_name = "mega_millions_after_2013"
-appender = "_496"
+appender = "_test_dao"
 engine_name = "mega_millions" + appender
-engine = get_engine(name=engine_name)
-Session = sessionmaker(engine)
+dbconnector = DatabaseConnector()
+dao = dbconnector.get_data_access_object(name=engine_name)
+# engine = get_engine(name=engine_name)
 
 ROOT_DIR = os.path.abspath(os.curdir)
 
@@ -28,12 +21,12 @@ def get_percent_for_all_numbers() -> None:
     with open(
         f"{ROOT_DIR}/statistics/regular_number_stats{appender}.csv", "w", newline=""
     ) as file:
-        with Session() as sess:
-            count_of_all_rows = sess.query(RegularNumbers).count()
-            for number in sess.query(RegularNumbers.number).distinct():
+        with dao.session() as sess:
+            count_of_all_rows = sess.query(dao.regular_numbers).count()
+            for number in sess.query(dao.regular_numbers.c.number).distinct():
                 count_for_number = (
-                    sess.query(RegularNumbers)
-                    .filter(RegularNumbers.number == number[0])
+                    sess.query(dao.regular_numbers)
+                    .filter(dao.regular_numbers.c.number == number[0])
                     .count()
                 )
                 percentage = 100.0 * count_for_number / count_of_all_rows
@@ -49,12 +42,12 @@ def get_percent_for_all_numbers() -> None:
     with open(
         f"{ROOT_DIR}/statistics/mega_ball_number_stats{appender}.csv", "w", newline=""
     ) as file:
-        with Session() as sess:
-            count_of_all_rows = sess.query(MegaBallNumbers).count()
-            for number in sess.query(MegaBallNumbers.number).distinct():
+        with dao.session() as sess:
+            count_of_all_rows = sess.query(dao.mega_ball_numbers).count()
+            for number in sess.query(dao.mega_ball_numbers.c.number).distinct():
                 count_for_number = (
-                    sess.query(MegaBallNumbers)
-                    .filter(MegaBallNumbers.number == number[0])
+                    sess.query(dao.mega_ball_numbers)
+                    .filter(dao.mega_ball_numbers.c.number == number[0])
                     .count()
                 )
                 percentage = 100.0 * count_for_number / count_of_all_rows
@@ -68,19 +61,17 @@ def get_percent_for_all_numbers() -> None:
 
 
 def set_connected_number_occurrences() -> None:
-    with Session() as sess:
-        truncate_statement = '''DROP TABLE connected_number_occurrences'''
-        sess.execute(truncate_statement)
-        sess.commit()
-        create_all_tables(engine_name=engine_name)
+    dao.metadata.tables['connected_number_occurrences'].drop(dao.engine)
+    dao.metadata.tables['connected_number_occurrences'].create(dao.engine)
+    with dao.session() as sess:
         
         for numbers_possible in range(1, 71):
                 connectedNumberOccurrences = ConnectedNumberOccurrences(lottery_number=numbers_possible)
                 sess.add(connectedNumberOccurrences)
                 sess.commit()
         
-        for id in sess.query(Winners.id).distinct():
-            winner_row = sess.query(Winners).filter(Winners.id == id[0]).first()
+        for id in sess.query(dao.winners.c.id).distinct():
+            winner_row = sess.query(dao.winners).filter(dao.winners.c.id == id[0]).first()
             first_number = winner_row.first_number
             second_number = winner_row.second_number
             third_number = winner_row.third_number
@@ -98,8 +89,8 @@ def set_connected_number_occurrences() -> None:
             add_occurrence_of_other_lotto_numbers(main_number=fifth_number,other_number_1=first_number, other_number_2=second_number, other_number_3=third_number, other_number_4=fourth_number, sess=sess)
                 
 def update_recent_connected_number_occurrences() -> None:
-    with Session() as sess:
-        last_two_added_winners = sess.query(Winners).order_by(Winners.id.desc()).limit(2)
+    with dao.session()as sess:
+        last_two_added_winners = sess.query(dao.winners).order_by(dao.winners.c.id.desc()).limit(2)
         for winner in last_two_added_winners:
             first_number = winner.first_number
             second_number = winner.second_number

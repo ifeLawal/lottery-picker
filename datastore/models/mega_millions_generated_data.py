@@ -17,6 +17,7 @@ class PureRandomTicketAttempts(Base, db.Model):
     mega_ball = Column(Integer)
     numbers_that_matched = Column(String(128))
     amt_of_numbers_that_matched = Column(Integer)
+    winnings = Column(Integer)
     jackpot = Column(String(128))
 
 class WeightedTicketAttempts(Base, db.Model):

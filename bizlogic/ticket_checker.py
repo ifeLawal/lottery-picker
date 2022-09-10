@@ -17,14 +17,38 @@ winning_options = {
     "mega": 2
 }
 
-def check_list_of_tickets(ticket: list, date: date):
+def check_winnings_of_tickets(tickets: list, date: date) -> int:
+    """
+    """
     draw_date = "07/26/22"
     with Session() as session:
         winner = session.query(Winners).filter(Winners.draw_date == draw_date)
-        # winning_ticket = {str(winner.first_number):""} [, winner.second_number, winner.third_number, winner.fourth_number, winner.fifth_number, winner.mega_ball]
-        # 
-        
+        regular_number_wins = {str(winner.first_number): True, str(winner.second_number): True, str(winner.third_number): True, str(winner.fourth_number): True, str(winner.fifth_number): True}
+        mega_ball_winner = {str(winner.mega_ball): True}
+    
+    total_wins = 0
+    for ticket in tickets:
+        total_wins += check_winnings_for_a_ticket(ticket=ticket, regular_winners=regular_number_wins, mega_ball_winner=mega_ball_winner)
     return [{constants.REGULAR_NUMBERS_PROPERTY_NAME:{"23": constants.MATCHED, "43": constants.UNMATCHED}, constants.MEGA_BALL_NUMBER_PROPERTY_NAME: {"23"}}]
+
+def get_matches_of_tickets(tickets: list, date: date) -> tuple:
+    """
+    
+    """
+    regular_ticket_matches = []
+    mega_ball_ticket_matches = []
+    draw_date = "07/26/22"
+    with Session() as session:
+        winner = session.query(Winners).filter(Winners.draw_date == draw_date)
+        regular_number_wins = {str(winner.first_number): True, str(winner.second_number): True, str(winner.third_number): True, str(winner.fourth_number): True, str(winner.fifth_number): True}
+        mega_ball_winner = {str(winner.mega_ball): True}
+        
+    for ticket in tickets:
+        regular_matches, mega_ball_matches = get_number_matches_on_ticket(ticket=ticket, regular_winners=regular_number_wins, mega_ball_winner=mega_ball_winner)
+        regular_ticket_matches.append(regular_matches)
+        mega_ball_ticket_matches.append(mega_ball_matches)
+        
+    return regular_ticket_matches, mega_ball_ticket_matches
 
 def get_number_matches_on_ticket(ticket: list, regular_winners: object, mega_ball_winner: object) -> object:
     """
