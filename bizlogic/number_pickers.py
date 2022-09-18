@@ -22,8 +22,24 @@ def random_megaball(number_of_tickets: int) -> list:
 #
 def random_ticket_creation(number_of_tickets: int) -> list:
     arr_of_tickets = []
+    arr = []
+    for i in range(70):
+        arr.append(i)
+    counter = 0
     for _ in range(number_of_tickets):
-        arr_of_tickets.append(pick_numbers())
+        numbers = []
+        random.shuffle(arr)
+        for i in range(5):
+            numbers.append(arr[counter])
+            counter += 1
+            if(counter >= len(arr)):
+                counter = 0
+                random.shuffle(arr)
+            
+        arr_of_tickets.append(numbers)
+    
+    # for _ in range(number_of_tickets):
+    #     arr_of_tickets.append(pick_numbers())
     return arr_of_tickets
 
 
@@ -32,7 +48,7 @@ def megaball_weighted(number_of_tickets: int) -> list:
     arr_megaball = []
     if number_of_tickets > constants.MEGA_BALL_MAX:
         for _ in range(constants.MEGA_BALL_MAX):
-            arr_megaball.append(i)
+            arr_megaball.append(i) # TODO figure out what i is aka the weighted number
     return arr_megaball
 
 
@@ -80,3 +96,4 @@ def pick_numbers() -> list:
 
 def pick_mega_ball() -> int:
     return random.randint(constants.MEGA_BALL_START, constants.MEGA_BALL_MAX)
+

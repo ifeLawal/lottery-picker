@@ -49,8 +49,6 @@ class TestTicketCheckerMethods(unittest.TestCase):
             sample_guess_ticket, sample_regular_winning_ticket, sample_winning_mega_ball
         )
 
-        print(regular_numbers_match)
-        print(mega_ball_number_match)
         for number in regular_numbers_match:
             assert (
                 expected_regular_number_result[number] == regular_numbers_match[number]
@@ -78,8 +76,8 @@ class TestTicketCheckerMethods(unittest.TestCase):
         assert expected == actual
     
     def test_create_tickets_and_check_for_wins(self) -> None:
-        expected = 0
+        expected = 2
         tickets = create_tickets(date="", number_of_tickets=60, generate_tickets=random_ticket_creation, generate_megaball=ordered_megaball)
         actual = check_winnings_for_multiple_tickets(tickets=tickets, date="07/26/2022")
         print(actual)
-        assert expected == actual
+        assert expected <= actual

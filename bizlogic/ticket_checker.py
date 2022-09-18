@@ -154,7 +154,6 @@ def check_winnings_for_a_ticket(
     for number in mega_ball_winner:
         if mega_ball_winner[number] == constants.MATCHED:
             mega_ball_winner_count += 1
-            print("we got the mega ball")
     for number in regular_number_winners:
         if regular_number_winners[number] == constants.MATCHED:
             regular_number_winner_count += 1
