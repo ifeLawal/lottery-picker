@@ -26,7 +26,7 @@ def get_matches_for_tickets(tickets: list, date: date) -> tuple:
         # winning regular numbers
         # {"64": True, "12": True, "33": True, "19": True, "23": True}
         # winning mega ball number
-        # {"12": True} 
+        # {"12": True}
         winner = session.query(dao.winners).filter(dao.winners.c.draw_date == draw_date)
         regular_number_wins = {
             str(winner.first_number): True,
@@ -85,7 +85,7 @@ def get_number_matches_on_ticket(
     return regular_number_results, mega_ball_number_results
     # regular number results structure:
     #  R1,                R2,               R3,            R4,            R5
-    # {"50": "no match", "15": "no match", "64": "match", "19": "match", "23": "match"}    
+    # {"50": "no match", "15": "no match", "64": "match", "19": "match", "23": "match"}
     # mega ball matches structure:
     # {"12": "match"}
 
@@ -93,9 +93,13 @@ def get_number_matches_on_ticket(
 # TODO convert this into a check_winnings method that works for a single and multiple tickets
 def check_winnings_for_multiple_tickets(tickets: list, date: date) -> int:
     """ """
-    draw_date = "07/26/2022" # TODO use the date parameter rather than hardcoded
+    draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
     with dao.session() as session:
-        winner = session.query(dao.winners).filter(dao.winners.c.draw_date == draw_date).first()
+        winner = (
+            session.query(dao.winners)
+            .filter(dao.winners.c.draw_date == draw_date)
+            .first()
+        )
         regular_number_wins = {
             str(winner.first_number): True,
             str(winner.second_number): True,
@@ -120,7 +124,6 @@ def check_winnings_for_multiple_tickets(tickets: list, date: date) -> int:
             mega_ball_winner=mega_ball_winner,
         )
     return total_wins
-
 
 
 def check_winnings_for_a_ticket(

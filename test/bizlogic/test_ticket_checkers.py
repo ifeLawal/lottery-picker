@@ -4,13 +4,12 @@ from bizlogic import constants
 from bizlogic.number_pickers import (
     create_tickets,
     ordered_megaball,
-    random_megaball,
     random_ticket_creation,
 )
 from bizlogic.ticket_checker import (
     check_winnings_for_a_ticket,
     get_number_matches_on_ticket,
-    check_winnings_for_multiple_tickets
+    check_winnings_for_multiple_tickets,
 )
 from datastore.models.mega_millions import dao, prep_db
 
@@ -25,7 +24,12 @@ sample_regular_winning_ticket = {
 }
 sample_winning_mega_ball = {"12": True}
 sample_guess_ticket = [23, 45, 64, 12, 43, 23]
-sample_guess_multiple_tickets = [[23, 45, 64, 12, 43, 23],[23, 1, 55, 89, 30, 12], [22, 1, 55, 89, 30, 12],[23, 1, 55, 89, 30, 22]]
+sample_guess_multiple_tickets = [
+    [23, 45, 64, 12, 43, 23],
+    [23, 1, 55, 89, 30, 12],
+    [22, 1, 55, 89, 30, 12],
+    [23, 1, 55, 89, 30, 22],
+]
 
 
 class TestTicketCheckerMethods(unittest.TestCase):
@@ -71,13 +75,20 @@ class TestTicketCheckerMethods(unittest.TestCase):
 
     def test_check_winnings_for_multiple_tickets(self) -> None:
         expected = 16
-        actual = check_winnings_for_multiple_tickets(tickets=sample_guess_multiple_tickets, date="07/26/2022")
-        
+        actual = check_winnings_for_multiple_tickets(
+            tickets=sample_guess_multiple_tickets, date="07/26/2022"
+        )
+
         assert expected == actual
-    
+
     def test_create_tickets_and_check_for_wins(self) -> None:
         expected = 2
-        tickets = create_tickets(date="", number_of_tickets=60, generate_tickets=random_ticket_creation, generate_megaball=ordered_megaball)
+        tickets = create_tickets(
+            date="",
+            number_of_tickets=60,
+            generate_tickets=random_ticket_creation,
+            generate_megaball=ordered_megaball,
+        )
         actual = check_winnings_for_multiple_tickets(tickets=tickets, date="07/26/2022")
         print(actual)
         assert expected <= actual

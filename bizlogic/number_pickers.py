@@ -32,12 +32,12 @@ def random_ticket_creation(number_of_tickets: int) -> list:
         for i in range(5):
             numbers.append(arr[counter])
             counter += 1
-            if(counter >= len(arr)):
+            if counter >= len(arr):
                 counter = 0
                 random.shuffle(arr)
-            
+
         arr_of_tickets.append(numbers)
-    
+
     # for _ in range(number_of_tickets):
     #     arr_of_tickets.append(pick_numbers())
     return arr_of_tickets
@@ -48,7 +48,7 @@ def megaball_weighted(number_of_tickets: int) -> list:
     arr_megaball = []
     if number_of_tickets > constants.MEGA_BALL_MAX:
         for _ in range(constants.MEGA_BALL_MAX):
-            arr_megaball.append(i) # TODO figure out what i is aka the weighted number
+            arr_megaball.append(i)  # TODO figure out what i is aka the weighted number
     return arr_megaball
 
 
@@ -65,7 +65,7 @@ def ordered_megaball(number_of_tickets: int) -> list:
 
 
 def create_tickets(
-    date: date, number_of_tickets: int, generate_tickets, generate_megaball
+    number_of_tickets: int, generate_tickets, generate_megaball, date: date
 ) -> list:
     arr_ticket = generate_tickets(number_of_tickets)
     arr_megaball = generate_megaball(number_of_tickets)
@@ -76,14 +76,19 @@ def create_tickets(
 
 def save_tickets_to_db(ticket_type: str, tickets: list):
     ins = dao.pure_random_ticket_attempts.insert()
+    if ticket_type == "random":
+        ins = dao.pure_random_ticket_attempts.insert()
     for arr in tickets:
-        dao.connection.execute(ins, draw_date=date.today(),
-                    first_number=arr[0],
-                    second_number=arr[1],
-                    third_number=arr[2],
-                    fourth_number=arr[3],
-                    fifth_number=arr[4],
-                    mega_ball=arr[5],)
+        dao.connection.execute(
+            ins,
+            draw_date=date.today(),
+            first_number=arr[0],
+            second_number=arr[1],
+            third_number=arr[2],
+            fourth_number=arr[3],
+            fifth_number=arr[4],
+            mega_ball=arr[5],
+        )
     pass
 
 
@@ -96,4 +101,3 @@ def pick_numbers() -> list:
 
 def pick_mega_ball() -> int:
     return random.randint(constants.MEGA_BALL_START, constants.MEGA_BALL_MAX)
-

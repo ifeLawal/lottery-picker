@@ -1,4 +1,3 @@
-
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -132,6 +131,14 @@ class DataAccessObject:
         Column("jackpot", String(128)),
     )
 
+    pure_random_configs = Table(
+        "pure_random_configs",
+        metadata,
+        Column("total_ticket_spend", Integer),
+        Column("total_ticket_earnings", Integer),
+        Column("biggest_win", Integer),
+    )
+
     weighted_ticket_attempts = Table(
         "weighted_ticket_attempts",
         metadata,
@@ -146,6 +153,14 @@ class DataAccessObject:
         Column("numbers_that_matched", String(128)),
         Column("amt_that_matched", Integer()),
         Column("jackpot", String(128)),
+    )
+
+    weighted_configs = Table(
+        "weighted_configs",
+        metadata,
+        Column("total_ticket_spend", Integer),
+        Column("total_ticket_earnings", Integer),
+        Column("biggest_win", Integer),
     )
 
     connected_number_occurrences = Table(
@@ -234,7 +249,14 @@ class DataAccessObject:
         self.connection = self.engine.connect()
         self.session = sessionmaker(bind=self.engine)
 
-    def db_clear(self) -> None:
+    def db_drop_table(self, table: str) -> None:
+        self.metadata.tables[table].drop(self.engine)
+
+    def reset_table(self, table: str) -> None:
+        self.metadata.tables[table].drop(self.engine)
+        self.metadata.tables[table].create(self.engine)
+
+    def db_drop_all(self) -> None:
         self.engine = create_engine(self.conn_string)
         self.metadata.drop_all(self.engine)
         self.connection = self.engine.connect()
@@ -295,6 +317,7 @@ def prep_db() -> None:
         }
     ]
     dao.connection.execute(ins, winners_list)
+
 
 """
 Create support tables meant for number analysis

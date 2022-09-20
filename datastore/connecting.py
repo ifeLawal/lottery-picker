@@ -27,7 +27,7 @@ class DatabaseConnector:
         db_location = os.path.join(self.basedir, f"{name}.db")
         conn_string = f"{self.db_type}+{self.db_api}:///{db_location}"
         dao.set_conn_string(conn_string=conn_string)
-        dao.db_clear()
+        dao.db_drop_all()
         dao.db_init(conn_string=conn_string)
         return dao
 

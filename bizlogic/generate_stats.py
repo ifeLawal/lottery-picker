@@ -59,8 +59,7 @@ def get_percent_for_all_numbers() -> None:
 
 
 def set_connected_number_occurrences() -> None:
-    dao.metadata.tables["connected_number_occurrences"].drop(dao.engine)
-    dao.metadata.tables["connected_number_occurrences"].create(dao.engine)
+    dao.reset_table("connected_number_occurrences")
     with dao.session() as sess:
 
         for numbers_possible in range(1, 71):

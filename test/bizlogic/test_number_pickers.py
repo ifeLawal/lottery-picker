@@ -6,11 +6,18 @@ from bizlogic.number_pickers import (
     ordered_megaball,
     random_megaball,
     random_ticket_creation,
+    save_tickets_to_db,
 )
+from datastore.models.mega_millions import dao, prep_db
 
 
 class TestNumberPickerMethods(unittest.TestCase):
-    def test_random_created_tickets_are_unique(self):
+    @classmethod
+    def setUpClass(cls):
+        dao.db_init("sqlite:///:memory:")
+        prep_db()
+
+    def test_random_created_tickets_are_unique(self) -> None:
         number_of_tickets = 30
         array_of_tickets = create_tickets(
             date=date.today(),
@@ -37,7 +44,7 @@ class TestNumberPickerMethods(unittest.TestCase):
         # this verifies that all the tickets are unique
         self.assertEqual(set_of_tickets.__len__(), number_of_tickets)
 
-    def test_megaball_selections_are_in_order(self):
+    def test_megaball_selections_are_in_order(self) -> None:
         number_of_tickets = 30
         array_of_tickets = create_tickets(
             date=date.today(),
@@ -54,3 +61,14 @@ class TestNumberPickerMethods(unittest.TestCase):
         for i in range(number_of_tickets):
             assert counter == only_megaballs[i]
             counter = counter % constants.MEGA_BALL_MAX + 1
+
+    def test_save_to_db(self) -> None:
+        number_of_tickets = 30
+        array_of_tickets = create_tickets(
+            date=date.today(),
+            number_of_tickets=number_of_tickets,
+            generate_tickets=random_ticket_creation,
+            generate_megaball=ordered_megaball,
+        )
+
+        save_tickets_to_db(ticket_type="random", tickets=array_of_tickets)
