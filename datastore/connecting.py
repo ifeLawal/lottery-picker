@@ -4,30 +4,47 @@
 import os
 
 from sqlalchemy import create_engine
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-db_type = "sqlite"
-db_api = "pysqlite"
-name = "mega_millions"
-db_location = os.path.join(basedir, f"{name}.db")
-DATABASE = f"{db_type}+{db_api}:///{db_location}"
-# {
-#     "drivername": "sqlite",
-#     # 'host': 'localhost',
-#     # 'port': '5432',
-#     # 'username': 'YOUR_USERNAME',
-#     # 'password': 'YOUR_PASSWORD',
-#     "database": "/path/to/your_db.sqlite",
-# }
+from datastore.models.mega_millions import DataAccessObject, dao
 
 
-def get_engine(name):
+class DatabaseConnector:
+    # {
+    #     "drivername": "sqlite",
+    #     # 'host': 'localhost',
+    #     # 'port': '5432',
+    #     # 'username': 'YOUR_USERNAME',
+    #     # 'password': 'YOUR_PASSWORD',
+    #     "database": "/path/to/your_db.sqlite",
+    # }
+
     basedir = os.path.abspath(os.path.dirname(__file__))
-    db_type = "sqlite"
-    db_api = "pysqlite"
-    db_location = os.path.join(basedir, f"{name}.db")
-    engine = create_engine(
-        f"{db_type}+{db_api}:///{db_location}", echo=True, future=True
-    )
-    # engine = create_engine(URL(**DATABASE))
-    return engine
+
+    def __init__(self, db_type="sqlite", db_api="pysqlite"):
+        self.db_type = db_type
+        self.db_api = db_api
+
+    def clean_tables_and_get_data_access_object(self, name) -> DataAccessObject:
+        db_location = os.path.join(self.basedir, f"{name}.db")
+        conn_string = f"{self.db_type}+{self.db_api}:///{db_location}"
+        dao.set_conn_string(conn_string=conn_string)
+        dao.db_drop_all()
+        dao.db_init(conn_string=conn_string)
+        return dao
+
+    def get_data_access_object(self, name) -> DataAccessObject:
+        db_location = os.path.join(self.basedir, f"{name}.db")
+        conn_string = f"{self.db_type}+{self.db_api}:///{db_location}"
+        dao.set_conn_string(conn_string=conn_string)
+        dao.db_init(conn_string=conn_string)
+        return dao
+
+    def get_engine(self, name):
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        db_type = "sqlite"
+        db_api = "pysqlite"
+        db_location = os.path.join(basedir, f"{name}.db")
+        engine = create_engine(
+            f"{db_type}+{db_api}:///{db_location}", echo=True, future=True
+        )
+        # engine = create_engine(URL(**DATABASE))
+        return engine

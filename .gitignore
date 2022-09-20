@@ -1,6 +1,8 @@
 /emailsystem
 /logs
 /datastore/mega_*
+*/.DS_store
+.DS_store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,9 +1,11 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
-from sqlalchemy.orm import relationship
+# Models for mega millions data
+* mega_millions - stores data associated with the actual winning numbers
+* mega_millions_generated - stores data associated with generated tickets we are playing (simulated or real)
 
-from datastore.models import Base, db
 
+# Archive models
 
+```python
 class PureRandomTicketAttempts(Base, db.Model):
     __tablename__ = "pure_random_attempts"
 
@@ -17,7 +19,9 @@ class PureRandomTicketAttempts(Base, db.Model):
     mega_ball = Column(Integer)
     numbers_that_matched = Column(String(128))
     amt_of_numbers_that_matched = Column(Integer)
+    winnings = Column(Integer)
     jackpot = Column(String(128))
+
 
 class WeightedTicketAttempts(Base, db.Model):
     __tablename__ = "weighted_ticket_attempts"
@@ -33,6 +37,7 @@ class WeightedTicketAttempts(Base, db.Model):
     numbers_that_matched = Column(String(128))
     amt_that_matched = Column(Integer)
     jackpot = Column(String(128))
+
 
 class ConnectedNumberOccurrences(Base, db.Model):
     __tablename__ = "connected_number_occurrences"
@@ -109,4 +114,4 @@ class ConnectedNumberOccurrences(Base, db.Model):
     Number68 = Column(Integer, default=0)
     Number69 = Column(Integer, default=0)
     Number70 = Column(Integer, default=0)
-
+```

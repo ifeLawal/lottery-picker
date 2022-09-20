@@ -2,22 +2,17 @@ import datetime
 import logging
 
 from lxml import etree, html
-# import json
-from sqlalchemy.orm import sessionmaker
 
-from bizlogic.date_mappings import days_of_the_week, months, quarters, years
-from datastore.connecting import get_engine
-from datastore.models.mega_millions import (Days, DaysOfTheWeek,
-                                            MegaBallNumbers, Months, Quarters,
-                                            RegularNumbers, Weeks, Winners,
-                                            Years)
+# import json
+
+from bizlogic.date_mappings import years
+from datastore.connecting import DatabaseConnector
+from datastore.models.mega_millions import create_date_mapping_tables
 from datastore.models.mega_millions_generated_data import ConnectedNumberOccurrences
 from scrape.scraper import Scraper
 
 mega_millions_endpoint = "/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html"
 table = "//div[@id='content']//table"
-weeks_in_a_year = 52
-days_in_a_month = 31
 
 log = logging.getLogger(__name__)
 
@@ -30,30 +25,32 @@ row_mapper = {
     "winners": 6,
 }
 
-engine_name = "mega_millions_after_2013"
-engine = get_engine(name=engine_name)
-Session = sessionmaker(engine)
-from datastore.models import create_all_tables, drop_all
+# engine_name = "mega_millions_after_2013"
+engine_name = "mega_millions_test_dao"
+dbconnect = DatabaseConnector()
+dao = dbconnect.get_data_access_object(name=engine_name)
 
-if engine.has_table == False:
-    create_all_tables(engine_name)
-    log.log(1, "Table created")
+# if engine.has_table == False:
+#     create_all_tables(engine_name)
+#     log.log(1, "Table created")
 
 
 def scrape_all_mega_millions_numbers() -> None:
     scraper = Scraper(base_url="https://www.texaslottery.com")
     # scraper.get_page_content(endpoint="/export/sites/lottery/Games/Mega_Millions/Winning_Numbers", inner_tag=table)
-    drop_all(engine_name=engine_name)
-    create_all_tables(engine_name=engine_name)
+    dao = dbconnect.clean_tables_and_get_data_access_object(name=engine_name)
     create_date_mapping_tables()
     table = "//div[@id='content']//table//tbody/tr"
+    # full website link: https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html
     rows = scraper.select_all_sections(endpoint=mega_millions_endpoint, xpath=table)
+
     for row in rows:
         hashmap = {}
         section_html_string = etree.tostring(row)
         section_root = html.fromstring(section_html_string)
+        # As a note this fails because the mega millions changed up lottery matrices a few times.
+        # The times are: 10/31/2017, 10/22/2013, 6/24/2005
         try:
-
             log.debug("Retrieving winning number data")
             for key, value in row_mapper.items():
                 hashmap[key] = scraper.get_direct_text_from_element(
@@ -61,36 +58,38 @@ def scrape_all_mega_millions_numbers() -> None:
                 )
             log.debug("Retrieved winning number data")
         except Exception as ex:
+            print(f"Error {ex}")
             log.debug("Failed to retrieve winning number data")
             log.error(ex)
-            log.debug("Continuing to run")
-            continue
+            break
         numbers = parse_numbers(hashmap["numbers"])
 
         date_map = parse_date(hashmap["date"])
-        if (
-            date_map["year"] == 2013
-            and date_map["month"] == 10
-            and date_map["day"] == 18
-        ):
-            break
-        with Session() as session:
-            winner = Winners(
-                draw_date=hashmap["date"],
-                first_number=numbers[0],
-                second_number=numbers[1],
-                third_number=numbers[2],
-                fourth_number=numbers[3],
-                fifth_number=numbers[4],
-                mega_ball=hashmap["mega_ball"],
-                megaplier=hashmap["megaplier"],
-                jackpot=hashmap["jackpot"],
-            )
-            session.add(winner)
-            session.commit()
+        # This was if we wanted to go all the way to the 2013 lottery drawing type
+        # if (
+        #     date_map["year"] == 2013
+        #     and date_map["month"] == 10
+        #     and date_map["day"] == 18
+        # ):
+        #     break
+        ins = dao.winners.insert()
+        dao.connection.execute(
+            ins,
+            draw_date=hashmap["date"],
+            first_number=numbers[0],
+            second_number=numbers[1],
+            third_number=numbers[2],
+            fourth_number=numbers[3],
+            fifth_number=numbers[4],
+            mega_ball=hashmap["mega_ball"],
+            megaplier=hashmap["megaplier"],
+            jackpot=hashmap["jackpot"],
+        )
 
+        ins = dao.regular_numbers.insert()
         for number in numbers:
-            regular_numbers = RegularNumbers(
+            dao.connection.execute(
+                ins,
                 number=number,
                 month_id=date_map["month"],
                 week_id=date_map["week"],
@@ -99,10 +98,10 @@ def scrape_all_mega_millions_numbers() -> None:
                 year_id=years[date_map["year"]],
                 day_id=date_map["day"],
             )
-            session.add(regular_numbers)
-            session.commit()
 
-        mega_ball_number = MegaBallNumbers(
+        ins = dao.mega_ball_numbers.insert()
+        dao.connection.execute(
+            ins,
             number=hashmap["mega_ball"],
             month_id=date_map["month"],
             week_id=date_map["week"],
@@ -111,8 +110,11 @@ def scrape_all_mega_millions_numbers() -> None:
             year_id=years[date_map["year"]],
             day_id=date_map["day"],
         )
-        session.add(mega_ball_number)
-        session.commit()
+
+
+"""
+Currently scrapes two days worth of data due to a lack of actual infrastructure setup, aka the cron job runs only on Fridays.
+"""
 
 
 def scrape_most_recent_mega_millions_number() -> None:
@@ -137,24 +139,27 @@ def scrape_most_recent_mega_millions_number() -> None:
             log.error(ex)
             break
         numbers = parse_numbers(hashmap["numbers"])
-        with Session() as session:
-            winner = Winners(
-                draw_date=hashmap["date"],
-                first_number=numbers[0],
-                second_number=numbers[1],
-                third_number=numbers[2],
-                fourth_number=numbers[3],
-                fifth_number=numbers[4],
-                mega_ball=hashmap["mega_ball"],
-                megaplier=hashmap["megaplier"],
-                jackpot=hashmap["jackpot"],
-            )
-            session.add(winner)
-            session.commit()
+
+        ins = dao.winners.insert()
+        dao.connection.execute(
+            ins,
+            draw_date=hashmap["date"],
+            first_number=numbers[0],
+            second_number=numbers[1],
+            third_number=numbers[2],
+            fourth_number=numbers[3],
+            fifth_number=numbers[4],
+            mega_ball=hashmap["mega_ball"],
+            megaplier=hashmap["megaplier"],
+            jackpot=hashmap["jackpot"],
+        )
 
         date_map = parse_date(hashmap["date"])
+
+        ins = dao.regular_numbers.insert()
         for number in numbers:
-            regular_numbers = RegularNumbers(
+            dao.connection.execute(
+                ins,
                 number=number,
                 month_id=date_map["month"],
                 week_id=date_map["week"],
@@ -163,10 +168,10 @@ def scrape_most_recent_mega_millions_number() -> None:
                 year_id=years[date_map["year"]],
                 day_id=date_map["day"],
             )
-            session.add(regular_numbers)
-            session.commit()
 
-        mega_ball_number = MegaBallNumbers(
+        ins = dao.mega_ball_numbers.insert()
+        dao.connection.execute(
+            ins,
             number=hashmap["mega_ball"],
             month_id=date_map["month"],
             week_id=date_map["week"],
@@ -175,11 +180,15 @@ def scrape_most_recent_mega_millions_number() -> None:
             year_id=years[date_map["year"]],
             day_id=date_map["day"],
         )
-        session.add(mega_ball_number)
-        session.commit()
         if counter >= 1:
             break
         counter += 1
+
+
+"""
+Take the string date on the mega millions website
+Convert that into a day of the week, day, month, year, week, and quarter values
+"""
 
 
 def parse_date(date: str) -> object:
@@ -202,6 +211,12 @@ def parse_date(date: str) -> object:
     return date_mapper
 
 
+"""
+Take the mega millions str ticket format of 'num - num ... - num - num'
+And convert it into an integer number list
+"""
+
+
 def parse_numbers(numbers: str) -> list:
     final_numbers = []
     for number in numbers.split("-"):
@@ -209,46 +224,22 @@ def parse_numbers(numbers: str) -> list:
     return final_numbers
 
 
-def create_date_mapping_tables() -> None:
-    with Session() as session:
-        if session.query(Months.id).count() <=0 :
-            for _, month in months.items():
-                month = Months(month=month)
-                session.add(month)
-                session.commit()
+# TODO - create calculateDaysAgo function
+# Pseudo code
+# in constants or helper python file the initial array or object with the mega millions number and the days ago value starting at 1 should exist
+# calculateDaysAgo(daysAgoPrev: obj, winners: list) -> obj:
+# take the array or object passed as an argument
+# loop through the object
+# set the winning lottery numbers as a dayAgo of one
+# increment the rest by 1
 
-        if session.query(DaysOfTheWeek.id).count() <=0 :
-            for _, day_of_the_week in days_of_the_week.items():
-                day_of_the_week = DaysOfTheWeek(day_of_the_week=day_of_the_week)
-                session.add(day_of_the_week)
-                session.commit()
 
-        if session.query(Quarters.id).count() <=0 :
-            for _, quarter in quarters.items():
-                quarter = Quarters(quarter=quarter)
-                session.add(quarter)
-                session.commit()
-
-        if session.query(Days.id).count() <=0 :
-            for day in range(1, 32):
-                day = Days(day=day)
-                session.add(day)
-                session.commit()
-
-        if session.query(Weeks.id).count() <=0 :
-            for week in range(1, 53):
-                week = Weeks(week=week)
-                session.add(week)
-                session.commit()
-
-        if session.query(Years.id).count() <=0 :
-            for year, _ in years.items():
-                year = Years(year=year)
-                session.add(year)
-                session.commit()
-
-        if session.query(ConnectedNumberOccurrences.id).count() <=0:
-            for numbers_possible in range(1, 71):
-                connectedNumberOccurrences = ConnectedNumberOccurrences(lottery_number=numbers_possible)
-                session.add(connectedNumberOccurrences)
-                session.commit()
+# TODO - create updateDaysAgo function
+# Pseudo code
+# updateDaysAgo(winners: list) -> obj:
+# query the DaysAgo table,
+# query would pull all the numbers. for each number, pull the latest value
+# pulling the latest can either involve using an array selector of last
+# or (order by row id descending, first one should be the latest)
+# depending on how this column is implemented
+# create an object using the number and latest daysAgo value
