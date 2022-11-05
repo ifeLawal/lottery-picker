@@ -1,16 +1,13 @@
 # https://www.lottoamerica.com/mega-millions/statistics
 import random
 import sys
+
 from multipledispatch import dispatch
 
-from bizlogic.mega_millions import (
-    scrape_all_mega_millions_numbers,
-    scrape_most_recent_mega_millions_number,
-)
-from bizlogic.generate_stats import (
-    get_percent_for_all_numbers,
-    set_connected_number_occurrences,
-)
+from bizlogic.generate_stats import (get_percent_for_all_numbers,
+                                     set_connected_number_occurrences)
+from bizlogic.scrape_mega_millions import (
+    scrape_all_mega_millions_numbers, scrape_most_recent_mega_millions_number)
 
 
 def experiment() -> None:

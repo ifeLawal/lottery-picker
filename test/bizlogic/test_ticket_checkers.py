@@ -1,16 +1,12 @@
-from datetime import date
 import unittest
+from datetime import date
+
 from bizlogic import constants
-from bizlogic.number_pickers import (
-    create_tickets,
-    ordered_megaball,
-    random_ticket_creation,
-)
-from bizlogic.ticket_checker import (
-    check_winnings_for_a_ticket,
-    get_number_matches_on_ticket,
-    check_winnings_for_multiple_tickets,
-)
+from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
+                                     get_random_regular_numbers)
+from bizlogic.ticket_checker import (check_winnings_for_a_ticket,
+                                     check_winnings_for_multiple_tickets,
+                                     get_number_matches_on_ticket)
 from datastore.models.mega_millions import dao, prep_db
 
 # sample_winning_ticket_obj = {constants.REGULAR_NUMBERS_PROPERTY_NAME: {"64": True, "12": True, "33": True, "19": True, "23": True}, constants.MEGA_BALL_NUMBER_PROPERTY_NAME:{"12": True}}
@@ -86,9 +82,12 @@ class TestTicketCheckerMethods(unittest.TestCase):
         tickets = create_tickets(
             date="",
             number_of_tickets=60,
-            generate_tickets=random_ticket_creation,
-            generate_megaball=ordered_megaball,
+            get_regular_numbers=get_random_regular_numbers,
+            generate_megaball=get_ordered_megaball,
         )
         actual = check_winnings_for_multiple_tickets(tickets=tickets, date="07/26/2022")
         print(actual)
         assert expected <= actual
+
+if __name__ == '__main__':
+    unittest.main()

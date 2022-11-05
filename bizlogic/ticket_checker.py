@@ -1,4 +1,5 @@
 from datetime import date
+
 from bizlogic import constants
 from datastore.models.mega_millions import dao
 
@@ -165,14 +166,11 @@ def check_winnings_for_a_ticket(
     if mega_ball_winner_count >= 1:
         append = "mega"
         winnings = 2
-    if regular_number_winner_count == 5:
-        winnings = winning_options["5win" + append]
-    if regular_number_winner_count == 4:
-        winnings = winning_options["4win" + append]
-    if regular_number_winner_count == 3:
-        winnings = winning_options["3win" + append]
-    if regular_number_winner_count == 2:
-        winnings = winning_options["2win" + append]
-    if regular_number_winner_count == 1:
-        winnings = winning_options["1win" + append]
+    if regular_number_winner_count > 0:
+        text = str(regular_number_winner_count) + "win" + append
+        winnings = winning_options[text]
     return winnings
+
+
+def calculate_cost_of_tickets(number_of_tickets: int, cost_of_ticket: int) -> int:
+    return number_of_tickets * cost_of_ticket

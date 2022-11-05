@@ -1,15 +1,8 @@
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    MetaData,
-    create_engine,
-)
+from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
+                        create_engine)
+from sqlalchemy.orm import sessionmaker
 
 from bizlogic.date_mappings import days_of_the_week, months, quarters, years
-from sqlalchemy.orm import sessionmaker
 
 weeks_in_a_year = 52
 days_in_a_month = 31
@@ -134,9 +127,34 @@ class DataAccessObject:
     pure_random_configs = Table(
         "pure_random_configs",
         metadata,
-        Column("total_ticket_spend", Integer),
-        Column("total_ticket_earnings", Integer),
-        Column("biggest_win", Integer),
+        Column("total_ticket_spend", Integer, default=0),
+        Column("total_ticket_earnings", Integer, default=0),
+        Column("biggest_win", Integer, default=0),
+    )
+
+    random_regular_ordered_megaball_ticket_attempts = Table(
+        "random_regular_ordered_megaball_ticket_attempts",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("draw_date", String(128), nullable=False),
+        Column("first_number", Integer()),
+        Column("second_number", Integer()),
+        Column("third_number", Integer()),
+        Column("fourth_number", Integer()),
+        Column("fifth_number", Integer()),
+        Column("mega_ball", Integer()),
+        Column("numbers_that_matched", String(128)),
+        Column("amt_of_numbers_that_matched", Integer()),
+        Column("winnings", Integer()),
+        Column("jackpot", String(128)),
+    )
+
+    random_regular_ordered_megaball_configs = Table(
+        "random_regular_ordered_megaball_configs",
+        metadata,
+        Column("total_ticket_spend", Integer, default=0),
+        Column("total_ticket_earnings", Integer, default=0),
+        Column("biggest_win", Integer, default=0),
     )
 
     weighted_ticket_attempts = Table(
@@ -158,9 +176,9 @@ class DataAccessObject:
     weighted_configs = Table(
         "weighted_configs",
         metadata,
-        Column("total_ticket_spend", Integer),
-        Column("total_ticket_earnings", Integer),
-        Column("biggest_win", Integer),
+        Column("total_ticket_spend", Integer, default=0),
+        Column("total_ticket_earnings", Integer, default=0),
+        Column("biggest_win", Integer, default=0),
     )
 
     connected_number_occurrences = Table(

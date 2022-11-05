@@ -15,8 +15,8 @@ update:
 shell:
 	python manage.py shell
 
-test:
+testpickers:
 	python -m unittest -v test/bizlogic/test_number_pickers.py
 
 testall:
-	python -m unittest -v test/bizlogic/*
+	python -B -m unittest -v test/bizlogic/*

@@ -1,9 +1,7 @@
 import csv
 import os
 
-
 from datastore.connecting import DatabaseConnector
-from datastore.models.mega_millions_generated_data import ConnectedNumberOccurrences
 
 # engine_name = "mega_millions_after_2013"
 appender = "_test_dao"
@@ -63,7 +61,7 @@ def set_connected_number_occurrences() -> None:
     with dao.session() as sess:
 
         for numbers_possible in range(1, 71):
-            connectedNumberOccurrences = ConnectedNumberOccurrences(
+            connectedNumberOccurrences = dao.connected_number_occurrences(
                 lottery_number=numbers_possible
             )
             sess.add(connectedNumberOccurrences)

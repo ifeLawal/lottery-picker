@@ -1,29 +1,20 @@
-from datetime import date
 import unittest
+from datetime import date
+
 from bizlogic import constants
-from bizlogic.number_pickers import (
-    create_tickets,
-    ordered_megaball,
-    random_megaball,
-    random_ticket_creation,
-    save_tickets_to_db,
-)
-from datastore.models.mega_millions import dao, prep_db
+from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
+                                     get_random_megaball,
+                                     get_random_regular_numbers)
 
 
 class TestNumberPickerMethods(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        dao.db_init("sqlite:///:memory:")
-        prep_db()
-
     def test_random_created_tickets_are_unique(self) -> None:
         number_of_tickets = 30
         array_of_tickets = create_tickets(
             date=date.today(),
             number_of_tickets=number_of_tickets,
-            generate_tickets=random_ticket_creation,
-            generate_megaball=random_megaball,
+            get_regular_numbers=get_random_regular_numbers,
+            generate_megaball=get_random_megaball,
         )
         # single ticket structure:
         # R - regular ball
@@ -49,8 +40,8 @@ class TestNumberPickerMethods(unittest.TestCase):
         array_of_tickets = create_tickets(
             date=date.today(),
             number_of_tickets=number_of_tickets,
-            generate_tickets=random_ticket_creation,
-            generate_megaball=ordered_megaball,
+            get_regular_numbers=get_random_regular_numbers,
+            generate_megaball=get_ordered_megaball,
         )
 
         only_megaballs = []
@@ -62,13 +53,5 @@ class TestNumberPickerMethods(unittest.TestCase):
             assert counter == only_megaballs[i]
             counter = counter % constants.MEGA_BALL_MAX + 1
 
-    def test_save_to_db(self) -> None:
-        number_of_tickets = 30
-        array_of_tickets = create_tickets(
-            date=date.today(),
-            number_of_tickets=number_of_tickets,
-            generate_tickets=random_ticket_creation,
-            generate_megaball=ordered_megaball,
-        )
-
-        save_tickets_to_db(ticket_type="random", tickets=array_of_tickets)
+if __name__ == '__main__':
+    unittest.main()
