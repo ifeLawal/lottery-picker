@@ -53,5 +53,6 @@ class TestNumberPickerMethods(unittest.TestCase):
             assert counter == only_megaballs[i]
             counter = counter % constants.MEGA_BALL_MAX + 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -92,13 +92,13 @@ def get_number_matches_on_ticket(
 
 
 # TODO convert this into a check_winnings method that works for a single and multiple tickets
-def check_winnings_for_multiple_tickets(tickets: list, date: date) -> int:
+def check_winnings_for_multiple_tickets(tickets: list, date: str) -> int:
     """ """
-    draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
+    # draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
     with dao.session() as session:
         winner = (
             session.query(dao.winners)
-            .filter(dao.winners.c.draw_date == draw_date)
+            .filter(dao.winners.c.draw_date == date)
             .first()
         )
         regular_number_wins = {

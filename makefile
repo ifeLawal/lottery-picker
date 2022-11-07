@@ -1,3 +1,4 @@
+
 lint:
 	flake8 --ignore=E402,E501,E712,W503,E203
 	black --check .
@@ -15,8 +16,13 @@ update:
 shell:
 	python manage.py shell
 
-testpickers:
-	python -m unittest -v test/bizlogic/test_number_pickers.py
+testfile:
+ifeq ($(strip $(file)),) # check if empty
+	python -B -m unittest -v test/bizlogic/*
+else 
+	python -B -m unittest -v $(file)
+endif
+
 
 testall:
 	python -B -m unittest -v test/bizlogic/*

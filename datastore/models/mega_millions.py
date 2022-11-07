@@ -127,6 +127,7 @@ class DataAccessObject:
     pure_random_configs = Table(
         "pure_random_configs",
         metadata,
+        Column("id", Integer, primary_key=True),
         Column("total_ticket_spend", Integer, default=0),
         Column("total_ticket_earnings", Integer, default=0),
         Column("biggest_win", Integer, default=0),
@@ -152,6 +153,7 @@ class DataAccessObject:
     random_regular_ordered_megaball_configs = Table(
         "random_regular_ordered_megaball_configs",
         metadata,
+        Column("id", Integer, primary_key=True),
         Column("total_ticket_spend", Integer, default=0),
         Column("total_ticket_earnings", Integer, default=0),
         Column("biggest_win", Integer, default=0),
@@ -176,6 +178,7 @@ class DataAccessObject:
     weighted_configs = Table(
         "weighted_configs",
         metadata,
+        Column("id", Integer, primary_key=True),
         Column("total_ticket_spend", Integer, default=0),
         Column("total_ticket_earnings", Integer, default=0),
         Column("biggest_win", Integer, default=0),
@@ -332,9 +335,31 @@ def prep_db() -> None:
             "mega_ball": "12",
             "megaplier": "2",
             "jackpot": "$82 million",
+        },
+        {
+            "draw_date": "07/28/2022",
+            "first_number": "14",
+            "second_number": "17",
+            "third_number": "9",
+            "fourth_number": "28",
+            "fifth_number": "50",
+            "mega_ball": "7",
+            "megaplier": "2",
+            "jackpot": "$109 million",
         }
     ]
     dao.connection.execute(ins, winners_list)
+    
+    ins = dao.pure_random_configs.insert()
+    
+    configs_items = [
+        {
+            "total_ticket_spend": 0,
+            "total_ticket_earnings": 0,
+            "biggest_win": 0
+        }
+    ]
+    dao.connection.execute(ins, configs_items)
 
 
 """
