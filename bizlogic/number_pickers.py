@@ -89,7 +89,7 @@ def get_megaball() -> int:
 # and it compiles to two to give you a complete ticket
 # this makes it flexible to merge strategies ie pure random, weighted, and more
 def create_tickets(
-    number_of_tickets: int, get_regular_numbers, generate_megaball, date: date
+    number_of_tickets: int, get_regular_numbers, generate_megaball
 ) -> list:
     arr_ticket = get_regular_numbers(number_of_tickets)
     arr_megaball = generate_megaball(number_of_tickets)

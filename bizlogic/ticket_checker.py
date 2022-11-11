@@ -97,9 +97,7 @@ def check_winnings_for_multiple_tickets(tickets: list, date: str) -> int:
     # draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
     with dao.session() as session:
         winner = (
-            session.query(dao.winners)
-            .filter(dao.winners.c.draw_date == date)
-            .first()
+            session.query(dao.winners).filter(dao.winners.c.draw_date == date).first()
         )
         regular_number_wins = {
             str(winner.first_number): True,

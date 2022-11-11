@@ -346,18 +346,14 @@ def prep_db() -> None:
             "mega_ball": "7",
             "megaplier": "2",
             "jackpot": "$109 million",
-        }
+        },
     ]
     dao.connection.execute(ins, winners_list)
-    
+
     ins = dao.pure_random_configs.insert()
-    
+
     configs_items = [
-        {
-            "total_ticket_spend": 0,
-            "total_ticket_earnings": 0,
-            "biggest_win": 0
-        }
+        {"total_ticket_spend": 0, "total_ticket_earnings": 0, "biggest_win": 0}
     ]
     dao.connection.execute(ins, configs_items)
 
