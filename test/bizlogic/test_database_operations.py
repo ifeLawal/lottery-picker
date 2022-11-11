@@ -3,9 +3,10 @@ from datetime import date
 
 from sqlalchemy.sql import select, update
 
-from bizlogic.database_operations import (get_tickets_played, get_winning_numbers,
+from bizlogic.database_operations import (get_tickets_played,
+                                          get_winning_numbers,
                                           save_tickets_to_db, update_winnings,
-                                          update_winnings_of_our_tickets)
+                                          )
 from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
                                      get_random_regular_numbers)
 from datastore.models.mega_millions import dao, prep_db
@@ -74,32 +75,24 @@ class TestNumberPickerMethods(unittest.TestCase):
     def test_update_latest_winnings(self) -> None:
 
         configs_columns_to_select = select(
-        [
-            dao.pure_random_configs.c.total_ticket_spend,
-            dao.pure_random_configs.c.total_ticket_earnings,
-            dao.pure_random_configs.c.biggest_win,
+            [
+                dao.pure_random_configs.c.total_ticket_spend,
+                dao.pure_random_configs.c.total_ticket_earnings,
+                dao.pure_random_configs.c.biggest_win,
             ]
         )
         config_row = dao.connection.execute(configs_columns_to_select).first()
         print(config_row)
         print("==============================")
-        number_of_tickets = 30
-        array_of_tickets = create_tickets(
-            number_of_tickets=number_of_tickets,
-            get_regular_numbers=get_random_regular_numbers,
-            generate_megaball=get_ordered_megaball,
-        )
 
         draw_date = "07/26/2022"
         print("len(tickets_played): " + str(len(get_tickets_played(draw_date))))
         update_winnings(ticket_type="random", draw_date=draw_date)
         print(get_tickets_played(draw_date, "winnings"))
-        
 
         print("==============================")
         config_row = dao.connection.execute(configs_columns_to_select).first()
         print(config_row)
-        
 
 
 if __name__ == "__main__":

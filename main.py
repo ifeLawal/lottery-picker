@@ -28,7 +28,7 @@ def run(type: str) -> None:
         scrape_all_mega_millions_numbers()
     elif type == "latest":
         print("latest running")
-        scrape_most_recent_mega_millions_number()
+        scrape_most_recent_mega_millions_number(1)
 
 
 if __name__ == "__main__":

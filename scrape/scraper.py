@@ -85,12 +85,12 @@ class Scraper:
             element = page.xpath(f"{inner_tag}/text()")
             return element[0]
         except Exception as ex:
-            print(f'{element} is not an array. {ex}')        
+            print(f"{element} is not an array. {ex}")
 
     def get_direct_text_from_element(self, element, inner_tag) -> str:
         try:
             element = element.xpath(f"{inner_tag}//text()")
             return element[0]
         except Exception as ex:
-            print(f'{element} is not an array. {ex}')
+            print(f"{element} is not an array. {ex}")
             raise Exception("Element not an array")

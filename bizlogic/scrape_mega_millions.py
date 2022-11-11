@@ -8,9 +8,6 @@ from datastore.connecting import DatabaseConnector
 from datastore.models.mega_millions import create_date_mapping_tables
 from scrape.scraper import Scraper
 
-# import json
-
-
 mega_millions_endpoint = "/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html"
 table = "//div[@id='content']//table"
 
@@ -58,18 +55,12 @@ def scrape_all_mega_millions_numbers() -> None:
         except Exception as ex:
             log.debug("Failed to retrieve winning number data")
             log.error(ex)
+            # If you want to continue and retrieve all the numbers, we can use a continue keyword to skip the broken lottery rows
             break
-        print("Retrieving winning number data: ", counter, ", ",hashmap["date"])
         numbers = parse_numbers(hashmap["numbers"])
 
         date_map = parse_date(hashmap["date"])
-        # This was if we wanted to go all the way to the 2013 lottery drawing type
-        # if (
-        #     date_map["year"] == 2013
-        #     and date_map["month"] == 10
-        #     and date_map["day"] == 18
-        # ):
-        #     break
+
         ins = dao.winners.insert()
         dao.connection.execute(
             ins,
@@ -115,7 +106,9 @@ Currently scrapes two days worth of data due to a lack of actual infrastructure 
 """
 
 
-def scrape_most_recent_mega_millions_number() -> None:
+def scrape_most_recent_mega_millions_number(
+    number_of_tickets_to_scrape: int = 1,
+) -> None:
     scraper = Scraper(base_url="https://www.texaslottery.com")
     table = "//div[@id='content']//table//tbody/tr"
     rows = scraper.select_all_sections(endpoint=mega_millions_endpoint, xpath=table)
@@ -178,7 +171,7 @@ def scrape_most_recent_mega_millions_number() -> None:
             year_id=years[date_map["year"]],
             day_id=date_map["day"],
         )
-        if counter >= 1:
+        if counter >= number_of_tickets_to_scrape:
             break
         counter += 1
 

@@ -36,19 +36,22 @@ def save_tickets_to_db(ticket_type: str, tickets: list, date: str) -> None:
 # otherwise go for today
 def update_winnings(ticket_type: str, draw_date: str = None) -> None:
     if draw_date == None or len(draw_date) <= 0:
-        date_time_obj = datetime.datetime.strptime(date.today(), "%m/%d/%Y/") - timedelta(
-            days=1
-        )
+        date_time_obj = datetime.datetime.strptime(
+            date.today(), "%m/%d/%Y/"
+        ) - timedelta(days=1)
         date_str = date_time_obj.strftime("%m/%d/%Y/")
     else:
         date_str = draw_date
 
     tickets = get_tickets_played(date_str)
     update_winnings_of_our_tickets(
-        tickets=tickets, ticket_type=ticket_type, draw_date=date_str)
+        tickets=tickets, ticket_type=ticket_type, draw_date=date_str
+    )
 
 
-def update_winnings_of_our_tickets(tickets: list, ticket_type: str, draw_date: str) -> None:
+def update_winnings_of_our_tickets(
+    tickets: list, ticket_type: str, draw_date: str
+) -> None:
     configs_columns_to_select = select(
         [
             dao.pure_random_configs.c.total_ticket_spend,
@@ -56,7 +59,7 @@ def update_winnings_of_our_tickets(tickets: list, ticket_type: str, draw_date: s
             dao.pure_random_configs.c.biggest_win,
         ]
     )
-    # config_row
+
     (
         regular_number_wins,
         jackpot,
@@ -84,19 +87,22 @@ def update_winnings_of_our_tickets(tickets: list, ticket_type: str, draw_date: s
             dao.pure_random_ticket_attempts.c.id == single_ticket.id
         )
         update_statement = update_columns.values(
-            winnings=check_winnings_for_a_ticket(ticket=single_ticket, regular_winners=regular_number_wins, mega_ball_winner=megaball_number_win),
+            winnings=check_winnings_for_a_ticket(
+                ticket=single_ticket,
+                regular_winners=regular_number_wins,
+                mega_ball_winner=megaball_number_win,
+            ),
             jackpot=jackpot,
             numbers_that_matched=0,
-            amt_of_numbers_that_matched=0
+            amt_of_numbers_that_matched=0,
         )
         dao.connection.execute(update_statement)
 
-    total_wins = check_winnings_for_multiple_tickets(
-        tickets=tickets, date=draw_date)
+    total_wins = check_winnings_for_multiple_tickets(tickets=tickets, date=draw_date)
     cost_of_tickets = calculate_cost_of_tickets(
         len(tickets), constants.COST_OF_MEGA_MILLIONS_TICKET
     )
-    
+
     config_row = dao.connection.execute(configs_columns_to_select).first()
     update_columns = update(dao.pure_random_configs).where(
         dao.pure_random_configs.c.id == 1
@@ -133,8 +139,7 @@ def get_winning_numbers(draw_date: str = None) -> object:
             winner = (
                 session.query(dao.winners)
                 # TODO confirm this sort
-                .order_by(dao.winners.c.draw_date.desc())
-                .first()
+                .order_by(dao.winners.c.draw_date.desc()).first()
             )
         else:
             winner = (
@@ -154,18 +159,16 @@ def get_winning_numbers(draw_date: str = None) -> object:
     return regular_number_wins, winner.jackpot, megeball_number_wins, winner.draw_date
 
 
-def get_tickets_played(draw_date: str, order_column: str = None) -> object:
+def get_tickets_played(draw_date: str, order_by: str = None) -> object:
     tickets = []
     with dao.session() as session:
-        query = session.query(dao.pure_random_ticket_attempts).filter(dao.pure_random_ticket_attempts.c.draw_date == draw_date)
-        if order_column:
-            tickets = (
-                query
-                .order_by(dao.pure_random_ticket_attempts.c[order_column].desc())
-                .all()
-            )
+        query = session.query(dao.pure_random_ticket_attempts).filter(
+            dao.pure_random_ticket_attempts.c.draw_date == draw_date
+        )
+        if order_by:
+            tickets = query.order_by(
+                dao.pure_random_ticket_attempts.c[order_by].desc()
+            ).all()
         else:
-            tickets = (
-                query.all()
-            )
+            tickets = query.all()
     return tickets
