@@ -24,8 +24,10 @@ def run() -> None:
 @dispatch(str)
 def run(type: str) -> None:
     if type == "renew":
+        print("renew running")
         scrape_all_mega_millions_numbers()
     elif type == "latest":
+        print("latest running")
         scrape_most_recent_mega_millions_number()
 
 

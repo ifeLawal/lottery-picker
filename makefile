@@ -23,6 +23,14 @@ else
 	python -B -m unittest -v $(file)
 endif
 
+requirements:
+	pip list --format=freeze > requirements-dev.txt
+
+install-requirements:
+	pip install -r requirements-dev.txt
 
 testall:
 	python -B -m unittest -v test/bizlogic/*
+
+envirnoment:
+	workon scrape-and-email

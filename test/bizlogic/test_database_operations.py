@@ -93,7 +93,7 @@ class TestNumberPickerMethods(unittest.TestCase):
         draw_date = "07/26/2022"
         print("len(tickets_played): " + str(len(get_tickets_played(draw_date))))
         update_winnings(ticket_type="random", draw_date=draw_date)
-        print(get_tickets_played(draw_date))
+        print(get_tickets_played(draw_date, "winnings"))
         
 
         print("==============================")

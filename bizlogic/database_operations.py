@@ -42,7 +42,6 @@ def update_winnings(ticket_type: str, draw_date: str = None) -> None:
         date_str = date_time_obj.strftime("%m/%d/%Y/")
     else:
         date_str = draw_date
-    print(date_str)
 
     tickets = get_tickets_played(date_str)
     update_winnings_of_our_tickets(
@@ -97,13 +96,11 @@ def update_winnings_of_our_tickets(tickets: list, ticket_type: str, draw_date: s
     cost_of_tickets = calculate_cost_of_tickets(
         len(tickets), constants.COST_OF_MEGA_MILLIONS_TICKET
     )
-    print("len(tickets): " + str(len(tickets)))
-
+    
     config_row = dao.connection.execute(configs_columns_to_select).first()
     update_columns = update(dao.pure_random_configs).where(
         dao.pure_random_configs.c.id == 1
     )
-    print("cost of tickets: " + str(cost_of_tickets))
 
     if config_row:
         biggest_win = total_wins
@@ -157,12 +154,18 @@ def get_winning_numbers(draw_date: str = None) -> object:
     return regular_number_wins, winner.jackpot, megeball_number_wins, winner.draw_date
 
 
-def get_tickets_played(draw_date: str) -> object:
+def get_tickets_played(draw_date: str, order_column: str = None) -> object:
     tickets = []
     with dao.session() as session:
-        tickets = (
-            session.query(dao.pure_random_ticket_attempts)
-            .filter(dao.pure_random_ticket_attempts.c.draw_date == draw_date)
-            .all()
-        )
+        query = session.query(dao.pure_random_ticket_attempts).filter(dao.pure_random_ticket_attempts.c.draw_date == draw_date)
+        if order_column:
+            tickets = (
+                query
+                .order_by(dao.pure_random_ticket_attempts.c[order_column].desc())
+                .all()
+            )
+        else:
+            tickets = (
+                query.all()
+            )
     return tickets
