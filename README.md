@@ -22,8 +22,9 @@ make refresh
 ### TODOs
 
 - Create tickets (Done)
-- Save tickets to db before the day of the mega millions ticket (Tue, Thu)
-- On the day after ticket is drawn, check the wins from the tickets created (Wed, Fri)
+- Save tickets to db (Done)
+- Automate creating and saving the tickets on the day of the drawing (Tue, Thu)
+- On the day after ticket is drawn, check the wins from the tickets created (Wed, Fri) and update
     - Send an email showing the ticket spread
 - Save the total loss
 - Setup airflow / more robust scheduler than cronjob

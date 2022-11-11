@@ -1,3 +1,4 @@
+
 lint:
 	flake8 --ignore=E402,E501,E712,W503,E203
 	black --check .
@@ -15,8 +16,21 @@ update:
 shell:
 	python manage.py shell
 
-test:
-	python -m unittest -v test/bizlogic/test_number_pickers.py
+testfile:
+ifeq ($(strip $(file)),) # check if empty
+	python -B -m unittest -v test/bizlogic/*
+else 
+	python -B -m unittest -v $(file)
+endif
+
+requirements:
+	pip list --format=freeze > requirements-dev.txt
+
+install-requirements:
+	pip install -r requirements-dev.txt
 
 testall:
-	python -m unittest -v test/bizlogic/*
+	python -B -m unittest -v test/bizlogic/*
+
+envirnoment:
+	workon scrape-and-email

@@ -3,12 +3,9 @@ import logging
 
 from lxml import etree, html
 
-# import json
-
 from bizlogic.date_mappings import years
 from datastore.connecting import DatabaseConnector
 from datastore.models.mega_millions import create_date_mapping_tables
-from datastore.models.mega_millions_generated_data import ConnectedNumberOccurrences
 from scrape.scraper import Scraper
 
 mega_millions_endpoint = "/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html"
@@ -25,53 +22,45 @@ row_mapper = {
     "winners": 6,
 }
 
-# engine_name = "mega_millions_after_2013"
+# engine_name = "mega_millions_after_2013" # Alternative db names
 engine_name = "mega_millions_test_dao"
 dbconnect = DatabaseConnector()
 dao = dbconnect.get_data_access_object(name=engine_name)
 
-# if engine.has_table == False:
-#     create_all_tables(engine_name)
-#     log.log(1, "Table created")
-
 
 def scrape_all_mega_millions_numbers() -> None:
     scraper = Scraper(base_url="https://www.texaslottery.com")
-    # scraper.get_page_content(endpoint="/export/sites/lottery/Games/Mega_Millions/Winning_Numbers", inner_tag=table)
+    # scraper.get_page_content(endpoint="/export/sites/lottery/Games/Mega_Millions/Winning_Numbers", inner_tag=table) # Alternative ways to scrape we considered
     dao = dbconnect.clean_tables_and_get_data_access_object(name=engine_name)
     create_date_mapping_tables()
     table = "//div[@id='content']//table//tbody/tr"
     # full website link: https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html
     rows = scraper.select_all_sections(endpoint=mega_millions_endpoint, xpath=table)
 
+    counter = 0
     for row in rows:
+        counter += 1
         hashmap = {}
         section_html_string = etree.tostring(row)
         section_root = html.fromstring(section_html_string)
         # As a note this fails because the mega millions changed up lottery matrices a few times.
         # The times are: 10/31/2017, 10/22/2013, 6/24/2005
+        # Here is a link to one such time: https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/Winning_Numbers/index.html_2013354932.html#:~:text=First%20Drawing
         try:
-            log.debug("Retrieving winning number data")
             for key, value in row_mapper.items():
                 hashmap[key] = scraper.get_direct_text_from_element(
                     element=section_root, inner_tag=f"//td[position()={value}]"
                 )
             log.debug("Retrieved winning number data")
         except Exception as ex:
-            print(f"Error {ex}")
             log.debug("Failed to retrieve winning number data")
             log.error(ex)
+            # If you want to continue and retrieve all the numbers, we can use a continue keyword to skip the broken lottery rows
             break
         numbers = parse_numbers(hashmap["numbers"])
 
         date_map = parse_date(hashmap["date"])
-        # This was if we wanted to go all the way to the 2013 lottery drawing type
-        # if (
-        #     date_map["year"] == 2013
-        #     and date_map["month"] == 10
-        #     and date_map["day"] == 18
-        # ):
-        #     break
+
         ins = dao.winners.insert()
         dao.connection.execute(
             ins,
@@ -117,7 +106,9 @@ Currently scrapes two days worth of data due to a lack of actual infrastructure 
 """
 
 
-def scrape_most_recent_mega_millions_number() -> None:
+def scrape_most_recent_mega_millions_number(
+    number_of_tickets_to_scrape: int = 1,
+) -> None:
     scraper = Scraper(base_url="https://www.texaslottery.com")
     table = "//div[@id='content']//table//tbody/tr"
     rows = scraper.select_all_sections(endpoint=mega_millions_endpoint, xpath=table)
@@ -127,8 +118,8 @@ def scrape_most_recent_mega_millions_number() -> None:
         section_html_string = etree.tostring(row)
         section_root = html.fromstring(section_html_string)
         try:
-
-            log.debug("Retrieving winning number data")
+            print("Retrieving latest winning number data")
+            log.debug("Retrieving latest winning number data")
             for key, value in row_mapper.items():
                 hashmap[key] = scraper.get_direct_text_from_element(
                     element=section_root, inner_tag=f"//td[position()={value}]"
@@ -180,7 +171,7 @@ def scrape_most_recent_mega_millions_number() -> None:
             year_id=years[date_map["year"]],
             day_id=date_map["day"],
         )
-        if counter >= 1:
+        if counter >= number_of_tickets_to_scrape:
             break
         counter += 1
 

@@ -81,8 +81,16 @@ class Scraper:
 
     def get_direct_text(self, endpoint, inner_tag) -> str:
         page = self.get_page(endpoint=endpoint)
-        print(page.xpath("//mat-tab-body"))
-        return page.xpath(f"{inner_tag}/text()")[0]
+        try:
+            element = page.xpath(f"{inner_tag}/text()")
+            return element[0]
+        except Exception as ex:
+            print(f"{element} is not an array. {ex}")
 
     def get_direct_text_from_element(self, element, inner_tag) -> str:
-        return element.xpath(f"{inner_tag}//text()")[0]
+        try:
+            element = element.xpath(f"{inner_tag}//text()")
+            return element[0]
+        except Exception as ex:
+            print(f"{element} is not an array. {ex}")
+            raise Exception("Element not an array")

@@ -1,4 +1,5 @@
 from datetime import date
+
 from bizlogic import constants
 from datastore.models.mega_millions import dao
 
@@ -91,14 +92,12 @@ def get_number_matches_on_ticket(
 
 
 # TODO convert this into a check_winnings method that works for a single and multiple tickets
-def check_winnings_for_multiple_tickets(tickets: list, date: date) -> int:
+def check_winnings_for_multiple_tickets(tickets: list, date: str) -> int:
     """ """
-    draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
+    # draw_date = "07/26/2022"  # TODO use the date parameter rather than hardcoded
     with dao.session() as session:
         winner = (
-            session.query(dao.winners)
-            .filter(dao.winners.c.draw_date == draw_date)
-            .first()
+            session.query(dao.winners).filter(dao.winners.c.draw_date == date).first()
         )
         regular_number_wins = {
             str(winner.first_number): True,
@@ -165,14 +164,11 @@ def check_winnings_for_a_ticket(
     if mega_ball_winner_count >= 1:
         append = "mega"
         winnings = 2
-    if regular_number_winner_count == 5:
-        winnings = winning_options["5win" + append]
-    if regular_number_winner_count == 4:
-        winnings = winning_options["4win" + append]
-    if regular_number_winner_count == 3:
-        winnings = winning_options["3win" + append]
-    if regular_number_winner_count == 2:
-        winnings = winning_options["2win" + append]
-    if regular_number_winner_count == 1:
-        winnings = winning_options["1win" + append]
+    if regular_number_winner_count > 0:
+        text = str(regular_number_winner_count) + "win" + append
+        winnings = winning_options[text]
     return winnings
+
+
+def calculate_cost_of_tickets(number_of_tickets: int, cost_of_ticket: int) -> int:
+    return number_of_tickets * cost_of_ticket
