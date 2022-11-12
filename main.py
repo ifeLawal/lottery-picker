@@ -1,5 +1,6 @@
 # https://www.lottoamerica.com/mega-millions/statistics
 import sys
+import traceback
 
 from multipledispatch import dispatch
 
@@ -26,21 +27,25 @@ def run() -> None:
 
 @dispatch(list)
 def run(args: list) -> None:
-    message = "no script ran"
-    if args[0] == "renew":
-        print("renew running")
-        scrape_all_mega_millions_numbers()
-        message = "we ran the renew script"
-    elif args[0] == "latest":
-        print("latest running")
-        scrape_most_recent_mega_millions_number(1)
-        message = "we ran the latest script"
-    elif args[0] == "check_winnings":
-        pull_latest_mega_millions_winning_ticket()
-        message = update_guess_tickets_by_type(args[1])
-    elif args[0] == "create_tickets":
-        message = create_tickets_and_save(int(args[1]))
-    email_lottery_run_msg(message)
+    try:
+        message = "no script ran"
+        if args[0] == "renew":
+            print("renew running")
+            scrape_all_mega_millions_numbers()
+            message = "we ran the renew script"
+        elif args[0] == "latest":
+            print("latest running")
+            scrape_most_recent_mega_millions_number(1)
+            message = "we ran the latest script"
+        elif args[0] == "check_winnings":
+            pull_latest_mega_millions_winning_ticket()
+            message = update_guess_tickets_by_type(args[1])
+        elif args[0] == "create_tickets":
+            message = create_tickets_and_save(int(args[1]))
+        email_lottery_run_msg(message)
+    except Exception as exception:
+        print(traceback.format_exc())
+        print(exception)
 
 
 if __name__ == "__main__":
