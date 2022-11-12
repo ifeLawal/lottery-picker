@@ -1,11 +1,14 @@
 # https://www.lottoamerica.com/mega-millions/statistics
-import random
 import sys
 
 from multipledispatch import dispatch
 
 from bizlogic.generate_stats import (get_percent_for_all_numbers,
                                      set_connected_number_occurrences)
+from bizlogic.notifier import email_lottery_run_msg
+from bizlogic.orchestrator import (create_tickets_and_save,
+                                   pull_latest_mega_millions_winning_ticket,
+                                   update_guess_tickets_by_type)
 from bizlogic.scrape_mega_millions import (
     scrape_all_mega_millions_numbers, scrape_most_recent_mega_millions_number)
 
@@ -21,14 +24,20 @@ def run() -> None:
     scrape_all_mega_millions_numbers()
 
 
-@dispatch(str)
-def run(type: str) -> None:
-    if type == "renew":
+@dispatch(list)
+def run(args: list) -> None:
+    if args[0] == "renew":
         print("renew running")
         scrape_all_mega_millions_numbers()
-    elif type == "latest":
+    elif args[0] == "latest":
         print("latest running")
         scrape_most_recent_mega_millions_number(1)
+    elif args[0] == "check_winnings":
+        pull_latest_mega_millions_winning_ticket()
+        message = update_guess_tickets_by_type(args[1])
+    elif args[0] == "create_tickets":
+        message = create_tickets_and_save(int(args[1]))
+    email_lottery_run_msg(message)
 
 
 if __name__ == "__main__":
@@ -37,5 +46,6 @@ if __name__ == "__main__":
     # args[1] = function name
     # args[2:] = function args : (*unpacked)
     function = globals()[args[1]]
-    function(*args[2:])
+    print(args[2:])
+    function(args[2:])
     # scrape_most_recent_mega_millions_number()

@@ -2,9 +2,7 @@ import datetime
 from datetime import date, timedelta
 
 from bizlogic.database_operations import (get_tickets_played,
-                                          get_winning_numbers,
-                                          save_tickets_to_db, update_winnings,
-                                          update_winnings_of_our_tickets)
+                                          save_tickets_to_db, update_winnings)
 from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
                                      get_random_regular_numbers)
 from bizlogic.scrape_mega_millions import \
@@ -17,28 +15,37 @@ def pull_latest_mega_millions_winning_ticket() -> None:
 
 
 # Run this on Tue / Fri
-def create_tickets_and_save(
-    number_of_tickets: int, ticket_type: str = "random"
-) -> None:
+def create_tickets_and_save(number_of_tickets: int, ticket_type: str = "random") -> str:
     array_of_tickets = create_tickets(
         number_of_tickets=number_of_tickets,
         get_regular_numbers=get_random_regular_numbers,
         generate_megaball=get_ordered_megaball,
     )
 
-    draw_date = datetime.datetime.strptime(date.today(), "%m/%d/%Y/")
+    draw_date = date.today().strftime("%m/%d/%Y/")
 
     save_tickets_to_db(
         ticket_type=ticket_type, tickets=array_of_tickets, date=draw_date
     )
+    tickets_in_string = "<h1>Tickets created</h1>"
+    counter = 1
+    for ticket in array_of_tickets:
+        temp_string = ", ".join(str(n).zfill(2) for n in ticket)
+        tickets_in_string += f"{str(counter).zfill(2)}. {temp_string}<br />"
+        counter += 1
+    return tickets_in_string
 
 
 # Run this on Wed / Sat after pulling the latest winner
-def update_guess_tickets_by_type(ticket_type: str = "random") -> None:
-    date_time_obj = datetime.datetime.strptime(
-        date.today(), "%m/%d/%Y/"
-    ) - timedelta(days=1)
-    draw_date = date_time_obj.strftime("%m/%d/%Y/")
-    
-    update_winnings(ticket_type=ticket_type, draw_date=draw_date)
-    get_tickets_played(draw_date=draw_date, order_by="winnings")
+def update_guess_tickets_by_type(ticket_type: str = "random") -> str:
+    # yesterday = date.today() - timedelta(days = 1)
+    draw_date = date.today().strftime("%m/%d/%Y/")  # yesterday.strftime("%m/%d/%Y/")
+
+    config_row = update_winnings(ticket_type=ticket_type)
+    array_of_tickets = get_tickets_played(draw_date=draw_date, order_by="winnings")
+    tickets_in_string = f"<h1>Ticket Winning Status</h1> <h3>{config_row}</h3>"
+    counter = 1
+    for ticket in array_of_tickets:
+        tickets_in_string += f"{str(counter).zfill(2)}. {ticket.__repr__()} <br />"
+        counter += 1
+    return tickets_in_string

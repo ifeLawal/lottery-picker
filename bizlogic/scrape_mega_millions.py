@@ -113,7 +113,11 @@ def scrape_most_recent_mega_millions_number(
     table = "//div[@id='content']//table//tbody/tr"
     rows = scraper.select_all_sections(endpoint=mega_millions_endpoint, xpath=table)
     counter = 0
+
     for row in rows:
+        if counter > number_of_tickets_to_scrape:
+            break
+        counter += 1
         hashmap = {}
         section_html_string = etree.tostring(row)
         section_root = html.fromstring(section_html_string)
@@ -128,8 +132,17 @@ def scrape_most_recent_mega_millions_number(
         except Exception as ex:
             log.debug("Failed to retrieve winning number data")
             log.error(ex)
-            break
+            continue
         numbers = parse_numbers(hashmap["numbers"])
+        with dao.session() as session:
+            winner = (
+                session.query(dao.winners)
+                .filter(dao.winners.c.draw_date == hashmap["date"])
+                .first()
+            )
+            if winner:
+                print("Skipping duplicate winning ticket creation")
+                continue
 
         ins = dao.winners.insert()
         dao.connection.execute(
@@ -171,9 +184,6 @@ def scrape_most_recent_mega_millions_number(
             year_id=years[date_map["year"]],
             day_id=date_map["day"],
         )
-        if counter >= number_of_tickets_to_scrape:
-            break
-        counter += 1
 
 
 """

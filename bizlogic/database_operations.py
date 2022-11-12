@@ -1,7 +1,7 @@
 import datetime
 from datetime import date, timedelta
 
-from sqlalchemy.sql import select, update
+from sqlalchemy.sql import func, select, update
 
 from bizlogic import constants
 from bizlogic.scrape_mega_millions import dao
@@ -34,24 +34,38 @@ def save_tickets_to_db(ticket_type: str, tickets: list, date: str) -> None:
 
 # If a date is given, use it
 # otherwise go for today
-def update_winnings(ticket_type: str, draw_date: str = None) -> None:
+def update_winnings(ticket_type: str, draw_date: str = None) -> object:
+    winning_ticket_date = ""
+    guessed_ticket_date = ""
     if draw_date == None or len(draw_date) <= 0:
-        date_time_obj = datetime.datetime.strptime(
-            date.today(), "%m/%d/%Y/"
-        ) - timedelta(days=1)
-        date_str = date_time_obj.strftime("%m/%d/%Y/")
+        # If no draw_date given, get the latest winner ticket and latest guessed ticket and use that to compare
+        with dao.session() as session:
+            winner = (
+                session.query(dao.winners)
+                .order_by(dao.winners.c.draw_date.desc())
+                .first()
+            )
+            # TODO use the ticket_type to change which db we select from
+            guessed = (
+                session.query(dao.pure_random_ticket_attempts)
+                .order_by(dao.pure_random_ticket_attempts.c.draw_date.desc())
+                .first()
+            )
+        winning_ticket_date = winner.draw_date
+        guessed_ticket_date = guessed.draw_date
     else:
-        date_str = draw_date
+        winning_ticket_date = guessed_ticket_date = draw_date
 
-    tickets = get_tickets_played(date_str)
-    update_winnings_of_our_tickets(
-        tickets=tickets, ticket_type=ticket_type, draw_date=date_str
+    tickets = get_tickets_played(guessed_ticket_date)
+    config_row = update_winnings_of_our_tickets(
+        tickets=tickets, ticket_type=ticket_type, draw_date=winning_ticket_date
     )
+    return config_row
 
 
 def update_winnings_of_our_tickets(
     tickets: list, ticket_type: str, draw_date: str
-) -> None:
+) -> object:
     configs_columns_to_select = select(
         [
             dao.pure_random_configs.c.total_ticket_spend,
@@ -99,35 +113,51 @@ def update_winnings_of_our_tickets(
         dao.connection.execute(update_statement)
 
     total_wins = check_winnings_for_multiple_tickets(tickets=tickets, date=draw_date)
-    cost_of_tickets = calculate_cost_of_tickets(
-        len(tickets), constants.COST_OF_MEGA_MILLIONS_TICKET
-    )
 
     config_row = dao.connection.execute(configs_columns_to_select).first()
-    update_columns = update(dao.pure_random_configs).where(
-        dao.pure_random_configs.c.id == 1
-    )
+    with dao.session() as session:
+        cost_of_all_tickets = calculate_cost_of_tickets(
+            session.query(dao.pure_random_ticket_attempts).count(),
+            constants.COST_OF_MEGA_MILLIONS_TICKET,
+        )
+        winnings_of_all_tickets = session.query(
+            func.sum(dao.pure_random_ticket_attempts.c.winnings)
+        ).scalar()
 
-    if config_row:
+    if config_row == None:
+        if ticket_type == "random":
+            ins = dao.pure_random_configs.insert()
+        elif ticket_type == "weighted":
+            ins = dao.weighted_configs.insert()
+
+        dao.connection.execute(
+            ins,
+            total_ticket_spend=cost_of_all_tickets,
+            total_ticket_earnings=winnings_of_all_tickets,
+            biggest_win=total_wins,
+        )
+    else:
+        update_columns = update(dao.pure_random_configs).where(
+            dao.pure_random_configs.c.id == 1
+        )
+
         biggest_win = total_wins
+        # TODO figure out if I want biggest win by ticket or by date.
+        # current form is by date
+        # save the biggest win. Might have to move this to the check winnings section
         if config_row.biggest_win > total_wins:
             biggest_win = config_row.biggest_win
 
         update_config = update_columns.values(
-            total_ticket_spend=config_row.total_ticket_spend + cost_of_tickets,
-            total_ticket_earnings=config_row.total_ticket_earnings + total_wins,
+            total_ticket_spend=cost_of_all_tickets,
+            total_ticket_earnings=winnings_of_all_tickets,
             biggest_win=biggest_win,
         )
-        # TODO figure out if I want biggest win by ticket or by date.
-        # current form is by date
-        # save the biggest win. Might have to move this to the check winnings section
-    else:
-        update_config = update_columns.values(
-            total_ticket_spend=cost_of_tickets,
-            total_ticket_earnings=total_wins,
-            biggest_win=total_wins,
-        )
-    dao.connection.execute(update_config)
+
+        dao.connection.execute(update_config)
+
+    config_row = dao.connection.execute(configs_columns_to_select).first()
+    return config_row
 
 
 # Get winning numbers for a given date
@@ -159,7 +189,7 @@ def get_winning_numbers(draw_date: str = None) -> object:
     return regular_number_wins, winner.jackpot, megeball_number_wins, winner.draw_date
 
 
-def get_tickets_played(draw_date: str, order_by: str = None) -> object:
+def get_tickets_played(draw_date: str, order_by: str = None) -> list:
     tickets = []
     with dao.session() as session:
         query = session.query(dao.pure_random_ticket_attempts).filter(

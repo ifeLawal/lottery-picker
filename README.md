@@ -18,7 +18,6 @@ pip install -r requirements-dev.txt
 make refresh
 ```
 
-
 ### TODOs
 
 - Create tickets (Done)
@@ -28,3 +27,8 @@ make refresh
     - Send an email showing the ticket spread
 - Save the total loss
 - Setup airflow / more robust scheduler than cronjob
+
+### Commands to know
+
+- python main.py run create_tickets 30
+- python main.py run check_winnings random
