@@ -18,11 +18,10 @@ winning_options = {
 }
 
 # TODO convert this into a get_matches method that works for a single and multiple tickets
-def get_matches_for_tickets(tickets: list, date: date) -> tuple:
+def get_matches_for_tickets(tickets: list, draw_date: date) -> tuple:
     """ """
     regular_ticket_matches = []
     mega_ball_ticket_matches = []
-    draw_date = "07/26/2022"
     with dao.session() as session:
         # winning regular numbers
         # {"64": True, "12": True, "33": True, "19": True, "23": True}
@@ -161,7 +160,7 @@ def check_winnings_for_a_ticket(
             regular_number_winner_count += 1
     winnings = 0
     append = ""
-    if mega_ball_winner_count >= 1:
+    if mega_ball_winner_count == 1:
         append = "mega"
         winnings = 2
     if regular_number_winner_count > 0:

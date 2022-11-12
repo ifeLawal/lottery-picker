@@ -4,10 +4,6 @@ from datetime import date
 from bizlogic import constants
 
 
-def create_wednesday_tickets():
-    date.today()
-
-
 # =============== Regular Number Strategies Start ================
 
 #
@@ -37,7 +33,7 @@ def get_random_regular_numbers(number_of_tickets: int) -> list:
 def get_regular_numbers() -> list:
     return random.sample(
         range(constants.REGULAR_NUMBER_START, constants.REGULAR_NUMBER_MAX),
-        constants.MEGA_BALL_NUMBERS_NEEDED,
+        constants.AMT_OF_REGULAR_NUMBERS_NEEDED,
     )
 
 
@@ -58,7 +54,8 @@ def get_weighted_megaball(number_of_tickets: int) -> list:
     arr_megaball = []
     if number_of_tickets > constants.MEGA_BALL_MAX:
         for _ in range(constants.MEGA_BALL_MAX):
-            arr_megaball.append(i)  # TODO figure out what i is aka the weighted number
+            # TODO figure out what i is aka the weighted number
+            arr_megaball.append(i)
     return arr_megaball
 
 

@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 
 from bizlogic.database_operations import (get_tickets_played,
                                           save_tickets_to_db, update_winnings)
@@ -21,8 +22,8 @@ def create_tickets_and_save(number_of_tickets: int, ticket_type: str = "random")
         generate_megaball=get_ordered_megaball,
     )
 
-    draw_date = date.today().strftime("%m/%d/%Y/")
-
+    draw_date = date.today()
+    
     save_tickets_to_db(
         ticket_type=ticket_type, tickets=array_of_tickets, date=draw_date
     )
@@ -38,7 +39,7 @@ def create_tickets_and_save(number_of_tickets: int, ticket_type: str = "random")
 # Run this on Wed / Sat after pulling the latest winner
 def update_guess_tickets_by_type(ticket_type: str = "random") -> str:
     # yesterday = date.today() - timedelta(days = 1)
-    draw_date = date.today().strftime("%m/%d/%Y/")  # yesterday.strftime("%m/%d/%Y/")
+    draw_date = date.today()  # yesterday.strptime("%m/%d/%Y/").date()
 
     config_row = update_winnings(ticket_type=ticket_type)
     array_of_tickets = get_tickets_played(draw_date=draw_date, order_by="winnings")

@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from datetime import date
 
@@ -25,7 +26,7 @@ class TestNumberPickerMethods(unittest.TestCase):
             generate_megaball=get_ordered_megaball,
         )
 
-        draw_date = "07/26/2022"
+        draw_date = datetime.datetime.strptime("07/26/2022", "%m/%d/%Y").date()
         save_tickets_to_db(
             ticket_type="random", tickets=array_of_tickets, date=draw_date
         )
@@ -36,8 +37,7 @@ class TestNumberPickerMethods(unittest.TestCase):
                 .filter(dao.pure_random_ticket_attempts.c.draw_date == draw_date)
                 .all()
             )
-        print(tickets)
-        print(tickets[0].id)
+            
         assert len(tickets) == number_of_tickets
 
     def test_winning_numbers(self) -> None:
@@ -69,7 +69,7 @@ class TestNumberPickerMethods(unittest.TestCase):
         )
         dao.connection.execute(update_config)
         # print(dao.connection.execute(select_configs).first())
-        assert draw_date == "07/28/2022"
+        assert draw_date == datetime.datetime.strptime("07/28/2022", "%m/%d/%Y").date()
 
     def test_update_latest_winnings(self) -> None:
 
@@ -84,7 +84,7 @@ class TestNumberPickerMethods(unittest.TestCase):
         print(config_row)
         print("==============================")
 
-        draw_date = "07/26/2022"
+        draw_date = datetime.datetime.strptime("07/26/2022", "%m/%d/%Y").date()
         print("len(tickets_played): " + str(len(get_tickets_played(draw_date))))
         update_winnings(ticket_type="random", draw_date=draw_date)
         print(get_tickets_played(draw_date, "winnings"))

@@ -64,7 +64,7 @@ def scrape_all_mega_millions_numbers() -> None:
         ins = dao.winners.insert()
         dao.connection.execute(
             ins,
-            draw_date=hashmap["date"],
+            draw_date=datetime.datetime.strptime(hashmap["date"], "%m/%d/%Y").date(),
             first_number=numbers[0],
             second_number=numbers[1],
             third_number=numbers[2],
@@ -137,7 +137,7 @@ def scrape_most_recent_mega_millions_number(
         with dao.session() as session:
             winner = (
                 session.query(dao.winners)
-                .filter(dao.winners.c.draw_date == hashmap["date"])
+                .filter(dao.winners.c.draw_date == datetime.datetime.strptime(hashmap["date"], "%m/%d/%Y").date())
                 .first()
             )
             if winner:
@@ -147,7 +147,7 @@ def scrape_most_recent_mega_millions_number(
         ins = dao.winners.insert()
         dao.connection.execute(
             ins,
-            draw_date=hashmap["date"],
+            draw_date=datetime.datetime.strptime(hashmap["date"], "%m/%d/%Y").date(),
             first_number=numbers[0],
             second_number=numbers[1],
             third_number=numbers[2],

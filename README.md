@@ -26,7 +26,8 @@ make refresh
 - On the day after ticket is drawn, check the wins from the tickets created (Wed, Sat) and update (Done)
     - Send an email showing the ticket spread
 - Save the total loss (Done)
-- Add 
+- Add the winning ticket to the update email
+- Figure out why a zero number can be created as part of the tickets
 - Setup airflow / more robust scheduler than cronjob
 
 ### Commands to know
