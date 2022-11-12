@@ -1,13 +1,13 @@
 from emailsystem.emailer import EmailSystem
 
 
-def email_ticket_results():
+def email_lottery_run_msg(message: str):
     emailer = EmailSystem()
-    emailer.send_via_gmail(
-        "ifelaw2439@gmail.com",
-        """
-    
-                           """,
+    emailer.send_email(
+        subject="New York Lottery",
+        message_html=f"""
+            {message}
+        """,
     )
     # TODO include ticket information
     # Format

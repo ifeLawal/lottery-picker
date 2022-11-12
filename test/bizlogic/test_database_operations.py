@@ -5,8 +5,7 @@ from sqlalchemy.sql import select, update
 
 from bizlogic.database_operations import (get_tickets_played,
                                           get_winning_numbers,
-                                          save_tickets_to_db, update_winnings,
-                                          )
+                                          save_tickets_to_db, update_winnings)
 from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
                                      get_random_regular_numbers)
 from datastore.models.mega_millions import dao, prep_db

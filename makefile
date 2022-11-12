@@ -7,8 +7,12 @@ format:
 	black .
 	isort .
 
-refresh:
-	python main.py run renew
+run-command:
+ifeq ($(strip $(command)),) # check if empty
+	python main.py run refresh
+else 	
+	python main.py run $(command)
+endif
 
 update:
 	python main.py run latest
