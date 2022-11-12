@@ -9,7 +9,7 @@ format:
 
 run-command:
 ifeq ($(strip $(command)),) # check if empty
-	python main.py run refresh
+	python main.py run renew
 else 	
 	python main.py run $(command)
 endif
