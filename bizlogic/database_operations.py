@@ -1,5 +1,4 @@
-import datetime
-from datetime import date, timedelta
+from sqlalchemy import Date
 
 from sqlalchemy.sql import func, select, update
 
@@ -13,7 +12,7 @@ from bizlogic.ticket_checker import (calculate_cost_of_tickets,
 # Product use: save tickets we are generating the day before the drawing
 # ticket_type: Specify the type of tickets being generated
 # tickets: list with the ticket numbers
-def save_tickets_to_db(ticket_type: str, tickets: list, date: str) -> None:
+def save_tickets_to_db(ticket_type: str, tickets: list, date: Date) -> None:
     ins = dao.pure_random_ticket_attempts.insert()
 
     if ticket_type == "random_regular_ordered_megaball":
@@ -34,10 +33,10 @@ def save_tickets_to_db(ticket_type: str, tickets: list, date: str) -> None:
 
 # If a date is given, use it
 # otherwise go for today
-def update_winnings(ticket_type: str, draw_date: str = None) -> object:
+def update_winnings(ticket_type: str, draw_date: Date = None) -> object:
     winning_ticket_date = ""
     guessed_ticket_date = ""
-    if draw_date == None or len(draw_date) <= 0:
+    if draw_date == None:
         # If no draw_date given, get the latest winner ticket and latest guessed ticket and use that to compare
         with dao.session() as session:
             winner = (
@@ -64,7 +63,7 @@ def update_winnings(ticket_type: str, draw_date: str = None) -> object:
 
 
 def update_winnings_of_our_tickets(
-    tickets: list, ticket_type: str, draw_date: str
+    tickets: list, ticket_type: str, draw_date: Date
 ) -> object:
     configs_columns_to_select = select(
         [
@@ -162,10 +161,10 @@ def update_winnings_of_our_tickets(
 
 # Get winning numbers for a given date
 # or if no date given get the latest winning numbers
-def get_winning_numbers(draw_date: str = None) -> object:
+def get_winning_numbers(draw_date: Date = None) -> object:
     # I need to pull the latest winning row
     with dao.session() as session:
-        if draw_date == None or len(draw_date) <= 0:
+        if draw_date == None:
             winner = (
                 session.query(dao.winners)
                 # TODO confirm this sort
@@ -189,7 +188,7 @@ def get_winning_numbers(draw_date: str = None) -> object:
     return regular_number_wins, winner.jackpot, megeball_number_wins, winner.draw_date
 
 
-def get_tickets_played(draw_date: str, order_by: str = None) -> list:
+def get_tickets_played(draw_date: Date, order_by: str = None) -> list:
     tickets = []
     with dao.session() as session:
         query = session.query(dao.pure_random_ticket_attempts).filter(

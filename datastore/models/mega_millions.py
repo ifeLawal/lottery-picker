@@ -1,4 +1,5 @@
-from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table,
+import datetime
+from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table, Date,
                         create_engine)
 from sqlalchemy.orm import sessionmaker
 
@@ -18,7 +19,7 @@ class DataAccessObject:
         "winners",
         metadata,
         Column("id", Integer(), primary_key=True),
-        Column("draw_date", String(128), nullable=False),
+        Column("draw_date", Date, nullable=False),
         Column("first_number", Integer()),
         Column("second_number", Integer()),
         Column("third_number", Integer()),
@@ -111,7 +112,7 @@ class DataAccessObject:
         "pure_random_ticket_attempts",
         metadata,
         Column("id", Integer, primary_key=True),
-        Column("draw_date", String(128), nullable=False),
+        Column("draw_date", Date, nullable=False),
         Column("first_number", Integer()),
         Column("second_number", Integer()),
         Column("third_number", Integer()),
@@ -137,7 +138,7 @@ class DataAccessObject:
         "random_regular_ordered_megaball_ticket_attempts",
         metadata,
         Column("id", Integer, primary_key=True),
-        Column("draw_date", String(128), nullable=False),
+        Column("draw_date", Date, nullable=False),
         Column("first_number", Integer()),
         Column("second_number", Integer()),
         Column("third_number", Integer()),
@@ -163,7 +164,7 @@ class DataAccessObject:
         "weighted_ticket_attempts",
         metadata,
         Column("id", Integer, primary_key=True),
-        Column("draw_date", String(128), nullable=False),
+        Column("draw_date", Date, nullable=False),
         Column("first_number", Integer()),
         Column("second_number", Integer()),
         Column("third_number", Integer()),
@@ -326,7 +327,7 @@ def prep_db() -> None:
     ins = dao.winners.insert()
     winners_list = [
         {
-            "draw_date": "07/26/2022",
+            "draw_date": datetime.datetime.strptime("07/26/2022", "%m/%d/%Y").date(),
             "first_number": "64",
             "second_number": "12",
             "third_number": "33",
@@ -337,7 +338,7 @@ def prep_db() -> None:
             "jackpot": "$82 million",
         },
         {
-            "draw_date": "07/28/2022",
+            "draw_date": datetime.datetime.strptime("07/28/2022", "%m/%d/%Y").date(),
             "first_number": "14",
             "second_number": "17",
             "third_number": "9",
