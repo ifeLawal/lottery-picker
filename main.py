@@ -29,9 +29,11 @@ def run(args: list) -> None:
     if args[0] == "renew":
         print("renew running")
         scrape_all_mega_millions_numbers()
+        message = "we ran the renew script"
     elif args[0] == "latest":
         print("latest running")
         scrape_most_recent_mega_millions_number(1)
+        message = "we ran the latest script"
     elif args[0] == "check_winnings":
         pull_latest_mega_millions_winning_ticket()
         message = update_guess_tickets_by_type(args[1])
