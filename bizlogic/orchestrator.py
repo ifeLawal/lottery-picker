@@ -1,5 +1,4 @@
-import datetime
-from datetime import date, timedelta
+from datetime import date
 
 from bizlogic.database_operations import (get_tickets_played,
                                           save_tickets_to_db, update_winnings)
@@ -43,7 +42,7 @@ def update_guess_tickets_by_type(ticket_type: str = "random") -> str:
 
     config_row = update_winnings(ticket_type=ticket_type)
     array_of_tickets = get_tickets_played(draw_date=draw_date, order_by="winnings")
-    tickets_in_string = f"<h1>Ticket Winning Status</h1> <h3>{config_row}</h3>"
+    tickets_in_string = f"<h1>Ticket Winning Status</h1> <p>{config_row.keys()} </p> <h3>{config_row}</h3> <p>{array_of_tickets[0].keys()}</p>"
     counter = 1
     for ticket in array_of_tickets:
         tickets_in_string += f"{str(counter).zfill(2)}. {ticket.__repr__()} <br />"
