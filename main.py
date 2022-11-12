@@ -26,6 +26,7 @@ def run() -> None:
 
 @dispatch(list)
 def run(args: list) -> None:
+    message = "no script ran"
     if args[0] == "renew":
         print("renew running")
         scrape_all_mega_millions_numbers()
