@@ -36,6 +36,7 @@ def save_tickets_to_db(ticket_type: str, tickets: list, date: Date) -> None:
 def update_winnings(ticket_type: str, draw_date: Date = None) -> object:
     winning_ticket_date = ""
     guessed_ticket_date = ""
+
     if draw_date == None:
         # If no draw_date given, get the latest winner ticket and latest guessed ticket and use that to compare
         with dao.session() as session:
@@ -59,7 +60,7 @@ def update_winnings(ticket_type: str, draw_date: Date = None) -> object:
     config_row = update_winnings_of_our_tickets(
         tickets=tickets, ticket_type=ticket_type, draw_date=winning_ticket_date
     )
-    return config_row
+    return winner, config_row
 
 
 def update_winnings_of_our_tickets(
@@ -156,7 +157,7 @@ def update_winnings_of_our_tickets(
         dao.connection.execute(update_config)
 
     config_row = dao.connection.execute(configs_columns_to_select).first()
-    return config_row
+    return winner, config_row
 
 
 # Get winning numbers for a given date

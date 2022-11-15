@@ -41,9 +41,15 @@ def update_guess_tickets_by_type(ticket_type: str = "random") -> str:
     # yesterday = date.today() - timedelta(days = 1)
     draw_date = date.today()  # yesterday.strptime("%m/%d/%Y/").date()
 
-    config_row = update_winnings(ticket_type=ticket_type)
+    (winner, config_row) = update_winnings(ticket_type=ticket_type)
     array_of_tickets = get_tickets_played(draw_date=draw_date, order_by="winnings")
-    tickets_in_string = f"<h1>Ticket Winning Status</h1> <p>{config_row.keys()} </p> <h3>{config_row}</h3> <p>{array_of_tickets[0].keys()}</p>"
+    tickets_in_string = f"""
+        <h1>Ticket Winning Status</h1> 
+        <p>{config_row.keys()} </p> 
+        <h3>Overall metrics: {config_row}</h3> 
+        <h3>Winning ticket: {winner} </h3>
+        <p>{array_of_tickets[0].keys()}</p>
+    """
     counter = 1
     for ticket in array_of_tickets:
         tickets_in_string += f"{str(counter).zfill(2)}. {ticket.__repr__()} <br />"
