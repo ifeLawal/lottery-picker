@@ -157,7 +157,7 @@ def update_winnings_of_our_tickets(
         dao.connection.execute(update_config)
 
     config_row = dao.connection.execute(configs_columns_to_select).first()
-    return winner, config_row
+    return config_row
 
 
 # Get winning numbers for a given date
