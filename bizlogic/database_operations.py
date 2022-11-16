@@ -1,5 +1,4 @@
 from sqlalchemy import Date
-
 from sqlalchemy.sql import func, select, update
 
 from bizlogic import constants

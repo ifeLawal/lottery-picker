@@ -1,6 +1,7 @@
 import datetime
-from sqlalchemy import (Column, ForeignKey, Integer, MetaData, String, Table, Date,
-                        create_engine)
+
+from sqlalchemy import (Column, Date, ForeignKey, Integer, MetaData, String,
+                        Table, create_engine)
 from sqlalchemy.orm import sessionmaker
 
 from bizlogic.date_mappings import days_of_the_week, months, quarters, years
