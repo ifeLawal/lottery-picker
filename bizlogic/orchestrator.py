@@ -1,5 +1,5 @@
 import datetime
-from datetime import date
+from datetime import date, timedelta
 
 from bizlogic.database_operations import (get_tickets_played,
                                           save_tickets_to_db, update_winnings)
@@ -38,11 +38,11 @@ def create_tickets_and_save(number_of_tickets: int, ticket_type: str = "random")
 
 # Run this on Wed / Sat after pulling the latest winner
 def update_guess_tickets_by_type(ticket_type: str = "random") -> str:
-    # yesterday = date.today() - timedelta(days = 1)
-    draw_date = date.today()  # yesterday.strptime("%m/%d/%Y/").date()
+    yesterday = date.today() - timedelta(days = 1)
+    # draw_date = date.today()  # yesterday.strptime("%m/%d/%Y/").date()
 
     (winner, config_row) = update_winnings(ticket_type=ticket_type)
-    array_of_tickets = get_tickets_played(draw_date=draw_date, order_by="winnings")
+    array_of_tickets = get_tickets_played(draw_date=yesterday, order_by="winnings")
     tickets_in_string = f"""
         <h1>Ticket Winning Status</h1> 
         <p>{config_row.keys()} </p> 
