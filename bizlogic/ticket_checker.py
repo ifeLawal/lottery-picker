@@ -3,7 +3,7 @@ from datetime import date
 from bizlogic import constants
 from datastore.models.mega_millions import dao
 
-winning_options = {
+mega_millions_winning_options = {
     "5win": 1000000,
     "5winmega": 1000000,
     "4win": 500,
@@ -17,7 +17,23 @@ winning_options = {
     "mega": 2,
 }
 
+power_ball_winning_options = {
+    "5win": 1000000,
+    "5winmega": 1000000,
+    "4win": 100,
+    "4winmega": 50000,
+    "3win": 7,
+    "3winmega": 100,
+    "2win": 0,
+    "2winmega": 7,
+    "1win": 0,
+    "1winmega": 4,
+    "mega": 4,
+}
+
 # TODO convert this into a get_matches method that works for a single and multiple tickets
+
+
 def get_matches_for_tickets(tickets: list, draw_date: date) -> tuple:
     """ """
     regular_ticket_matches = []
@@ -116,7 +132,7 @@ def check_winnings_for_multiple_tickets(tickets: list, date: str) -> int:
     # {"12": True}
     total_wins = 0
     for ticket in tickets:
-        total_wins += check_winnings_for_a_ticket(
+        total_wins += check_winnings_for_a_mega_millions_ticket(
             ticket=ticket,
             regular_winners=regular_number_wins,
             mega_ball_winner=mega_ball_winner,
@@ -124,7 +140,7 @@ def check_winnings_for_multiple_tickets(tickets: list, date: str) -> int:
     return total_wins
 
 
-def check_winnings_for_a_ticket(
+def check_winnings_for_a_mega_millions_ticket(
     ticket: list, regular_winners: object, mega_ball_winner: object
 ) -> int:
     """
@@ -165,7 +181,53 @@ def check_winnings_for_a_ticket(
         winnings = 2
     if regular_number_winner_count > 0:
         text = str(regular_number_winner_count) + "win" + append
-        winnings = winning_options[text]
+        winnings = mega_millions_winning_options[text]
+    return winnings
+
+
+def check_winnings_for_a_power_ball_ticket(
+    ticket: list, regular_winners: object, mega_ball_winner: object
+) -> int:
+    """
+    check how much is won from the ticket numbers
+
+    :param object ticket: a tickets list of numbers. sample - [64, 12, 33, 19, 23, 12]
+    :param object regular_winners: winning ticket numbers. sample - {"64": True, "12": True, "33": True, "19": True, "23": True}
+    :param object mega_ball_winner: winning mega ball number. sample - {"12": True}
+    :return: the winnings
+    :rtype: int sample - 10
+    """
+    # If a player matches all five numbers and the "Power Ball” you win the jackpot
+    # Matching five numbers without the “Power Ball” would earn the player a $1 million prize.
+    # Matching four numbers plus the “Power Ball” is worth $50,000.
+    # Matching four numbers or three numbers and the “Power Ball” is worth $100.
+    # Matching three numbers or matching two numbers and the “Power Ball,” will win a player $7.
+    # Matching one number and the “Power Ball” is worth $4, and matching the “Power Ball” is worth a $4 prize.
+    regular_number_winner_count = 0
+    mega_ball_winner_count = 0
+    (regular_number_winners, mega_ball_winner) = get_number_matches_on_ticket(
+        ticket=ticket,
+        regular_winners=regular_winners,
+        mega_ball_winner=mega_ball_winner,
+    )
+    # winning regular numbers
+    # {"64": True, "12": True, "33": True, "19": True, "23": True}
+    # winning mega ball number
+    # {"12": True}
+    for number in mega_ball_winner:
+        if mega_ball_winner[number] == constants.MATCHED:
+            mega_ball_winner_count += 1
+    for number in regular_number_winners:
+        if regular_number_winners[number] == constants.MATCHED:
+            regular_number_winner_count += 1
+    winnings = 0
+    append = ""
+    if mega_ball_winner_count == 1:
+        append = "mega"
+        winnings = 2
+    if regular_number_winner_count > 0:
+        text = str(regular_number_winner_count) + "win" + append
+        winnings = power_ball_winning_options[text]
     return winnings
 
 
