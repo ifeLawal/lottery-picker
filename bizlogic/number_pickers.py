@@ -6,10 +6,14 @@ from bizlogic import constants
 # =============== Regular Number Strategies Start ================
 
 #
+
+
 def get_random_regular_numbers(number_of_tickets: int) -> list:
     arr_of_tickets = []
     regular_numbers_array = []
-    for i in range(constants.REGULAR_NUMBER_START, constants.REGULAR_NUMBER_MAX + 1):
+    for i in range(
+        constants.REGULAR_NUMBER_START, constants.MEGA_REGULAR_NUMBER_MAX + 1
+    ):
         regular_numbers_array.append(i)
     counter = 0
     for _ in range(number_of_tickets):
@@ -29,7 +33,7 @@ def get_random_regular_numbers(number_of_tickets: int) -> list:
 
 def get_regular_numbers() -> list:
     return random.sample(
-        range(constants.REGULAR_NUMBER_START, constants.REGULAR_NUMBER_MAX + 1),
+        range(constants.REGULAR_NUMBER_START, constants.MEGA_REGULAR_NUMBER_MAX + 1),
         constants.AMT_OF_REGULAR_NUMBERS_NEEDED,
     )
 

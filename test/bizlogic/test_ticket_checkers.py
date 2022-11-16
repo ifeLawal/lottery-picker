@@ -4,7 +4,7 @@ from datetime import date
 from bizlogic import constants
 from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
                                      get_random_regular_numbers)
-from bizlogic.ticket_checker import (check_winnings_for_a_ticket,
+from bizlogic.ticket_checker import (check_winnings_for_a_mega_millions_ticket,
                                      check_winnings_for_multiple_tickets,
                                      get_number_matches_on_ticket)
 from datastore.models.mega_millions import dao, prep_db
@@ -61,7 +61,7 @@ class TestTicketCheckerMethods(unittest.TestCase):
 
     def test_check_winnings(self) -> None:
         expected = 10
-        actual = check_winnings_for_a_ticket(
+        actual = check_winnings_for_a_mega_millions_ticket(
             ticket=sample_guess_ticket,
             regular_winners=sample_regular_winning_ticket,
             mega_ball_winner=sample_winning_mega_ball,

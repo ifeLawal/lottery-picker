@@ -4,7 +4,7 @@ from sqlalchemy.sql import func, select, update
 from bizlogic import constants
 from bizlogic.scrape_mega_millions import dao
 from bizlogic.ticket_checker import (calculate_cost_of_tickets,
-                                     check_winnings_for_a_ticket,
+                                     check_winnings_for_a_mega_millions_ticket,
                                      check_winnings_for_multiple_tickets)
 
 
@@ -100,7 +100,7 @@ def update_winnings_of_our_tickets(
             dao.pure_random_ticket_attempts.c.id == single_ticket.id
         )
         update_statement = update_columns.values(
-            winnings=check_winnings_for_a_ticket(
+            winnings=check_winnings_for_a_mega_millions_ticket(
                 ticket=single_ticket,
                 regular_winners=regular_number_wins,
                 mega_ball_winner=megaball_number_win,
