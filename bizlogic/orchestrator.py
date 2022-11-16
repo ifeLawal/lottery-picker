@@ -1,5 +1,5 @@
-from datetime import date
 import datetime
+from datetime import date
 
 from bizlogic.database_operations import (get_tickets_played,
                                           save_tickets_to_db, update_winnings)
@@ -23,7 +23,7 @@ def create_tickets_and_save(number_of_tickets: int, ticket_type: str = "random")
     )
 
     draw_date = date.today()
-    
+
     save_tickets_to_db(
         ticket_type=ticket_type, tickets=array_of_tickets, date=draw_date
     )

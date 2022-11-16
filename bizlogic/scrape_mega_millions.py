@@ -137,7 +137,10 @@ def scrape_most_recent_mega_millions_number(
         with dao.session() as session:
             winner = (
                 session.query(dao.winners)
-                .filter(dao.winners.c.draw_date == datetime.datetime.strptime(hashmap["date"], "%m/%d/%Y").date())
+                .filter(
+                    dao.winners.c.draw_date
+                    == datetime.datetime.strptime(hashmap["date"], "%m/%d/%Y").date()
+                )
                 .first()
             )
             if winner:

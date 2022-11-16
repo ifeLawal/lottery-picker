@@ -37,7 +37,7 @@ class TestNumberPickerMethods(unittest.TestCase):
                 .filter(dao.pure_random_ticket_attempts.c.draw_date == draw_date)
                 .all()
             )
-            
+
         assert len(tickets) == number_of_tickets
 
     def test_winning_numbers(self) -> None:
