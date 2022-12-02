@@ -1,10 +1,11 @@
+import datetime
 import unittest
 from datetime import date
 
 from bizlogic import constants
 from bizlogic.number_pickers import (create_tickets, get_ordered_megaball,
                                      get_random_regular_numbers)
-from bizlogic.ticket_checker import (check_winnings_for_a_mega_millions_ticket,
+from bizlogic.ticket_checker import (check_winnings_for_a_ticket,
                                      check_winnings_for_multiple_tickets,
                                      get_number_matches_on_ticket)
 from datastore.models.mega_millions import dao, prep_db
@@ -61,7 +62,7 @@ class TestTicketCheckerMethods(unittest.TestCase):
 
     def test_check_winnings(self) -> None:
         expected = 10
-        actual = check_winnings_for_a_mega_millions_ticket(
+        actual = check_winnings_for_a_ticket(
             ticket=sample_guess_ticket,
             regular_winners=sample_regular_winning_ticket,
             mega_ball_winner=sample_winning_mega_ball,
@@ -76,11 +77,21 @@ class TestTicketCheckerMethods(unittest.TestCase):
         )
 
         assert expected == actual
+    
+    def test_check_for_mega_ball_wins(self) -> None:
+        # winning 07/26/2022 numbers: [64, 12, 33, 19, 23, 12]
+        ticket_with_correct_megaball = [[1, 2, 3, 4, 5, 12]]
+        expected = 2
+        actual = check_winnings_for_multiple_tickets(tickets=ticket_with_correct_megaball, date="07/26/2022")
+        assert expected == actual
+        expected = 0
+        ticket_with_megaball_number_but_wrong_place = [[1, 2, 3, 4, 12, 5]]
+        actual = check_winnings_for_multiple_tickets(tickets=ticket_with_megaball_number_but_wrong_place, date="07/26/2022")
+        assert expected == actual
 
     def test_create_tickets_and_check_for_wins(self) -> None:
         expected = 2
         tickets = create_tickets(
-            date="",
             number_of_tickets=60,
             get_regular_numbers=get_random_regular_numbers,
             generate_megaball=get_ordered_megaball,
